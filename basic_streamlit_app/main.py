@@ -79,10 +79,10 @@ st.pyplot(boxplot.get_figure())
 # Same as previous; quantifying phenotypical differences 
 st.title("Average Bill Length by Species")
 st.bar_chart(
-    df.groupby("species", as_index=False)
+    filtered2_df.groupby("species", as_index=False)
       .mean(numeric_only=True),
-    x="species",
-    y="bill_length_mm",
+    x="Species",
+    y="Bill Length (mm)",
 )
 
 # Island vs Body Mass; creates dictionary to rename variables to avoid renaming axis later on
