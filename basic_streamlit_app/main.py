@@ -10,14 +10,28 @@ df = pd.read_csv("data/penguins.csv").dropna()
 # App Heading 
 st.title("Penguins By Island and Species")
 
-# DataFrame Selection; four categorical selection choices  
-island = st.selectbox("Select an Island", df["island"].unique())
-species = st.selectbox("Select a Species", df["species"].unique())
-sex = st.selectbox("Select a Sex", df['sex'].unique())
-year = st.selectbox('Select a Year', df['year'].unique())
-filter_df = df[(df["island"] == island) & (df["species"] == species) & (df['sex'] == sex) & (df['year'] == year)]
-st.write(f"Showing {species} penguins on {island} that are {sex} born in {year}") # displays filtered results as a sentence 
-st.dataframe(filter_df) 
+# DataFrame Selection; four categorical selection choices 
+# 1. Define your options (Keep your current logic)
+island_options = ['All'] + list(df["island"].unique())
+species_options = ['All'] + list(df['species'].unique())
+sex_options = ['All'] + list(df['sex'].unique())
+year_options = ['All'] + list(df['year'].unique().astype(str)) # Ensure years are strings for the list
+island = st.selectbox("Select an Island", island_options)
+species = st.selectbox("Select a Species", species_options)
+sex = st.selectbox("Select a Sex", sex_options)
+year = st.selectbox('Select a Year', year_options)
+filter_df = df.copy()
+if island != "All":
+    filter_df = filter_df[filter_df["island"] == island]
+if species != "All":
+    filter_df = filter_df[filter_df["species"] == species]
+if sex != "All":
+    filter_df = filter_df[filter_df["sex"] == sex]
+if year != "All":
+    filter_df = filter_df[filter_df["year"] == int(year)] # Cast back to int if needed
+
+st.write(f"Showing results for: {species}, {island}, {sex}, {year}")
+st.dataframe(filter_df)
 
 # Setting up species-based categorization system and cleaning data 
 species_options = ['Adelie', 'Gentoo', 'Chinstrap']
