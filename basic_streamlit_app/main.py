@@ -80,7 +80,7 @@ st.pyplot(boxplot.get_figure())
 st.title("Average Bill Length by Species")
 avg_bill = (
     filtered2_df
-    .groupby("Species", as_index=False)
+    .groupby("Island", as_index=False)["Bill Length (mm)"]
     .mean(numeric_only=True)
 )
 st.bar_chart(
