@@ -78,8 +78,10 @@ st.pyplot(boxplot.get_figure())
 
 # Same as previous; quantifying phenotypical differences 
 st.title("Average Bill Length by Island")
+# Pre-calculate the mean to ensure it's not a total
+avg_df = filtered_df.groupby('island', as_index=False)['bill_length_mm'].mean()
 st.bar_chart(
-    data=filtered_df, 
+    data=avg_df, 
     x='island', 
     y='bill_length_mm'
 )
