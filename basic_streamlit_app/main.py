@@ -78,7 +78,7 @@ st.pyplot(boxplot.get_figure())
 
 # Same as previous; quantifying phenotypical differences 
 avg_bill = df['bill_length_mm'].mean()
-st.bar_chart(filtered_df, x='island', y='bill_length_mm')
+st.bar_chart(filtered_df, x='island', y=avg_bill)
 
 # Island vs Body Mass; creates dictionary to rename variables to avoid renaming axis later on
 island_options = ['Biscoe', 'Dream', 'Torgersen']
