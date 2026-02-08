@@ -65,7 +65,6 @@ st.scatter_chart(
     y = "Bill Depth (mm)",
     color = 'Sex'
 )
-st.write(f'You selected: {selected_species}')
 
 # Shows average body mass by species to show size differences
 st.title("Average Body Mass by Species")
@@ -85,6 +84,9 @@ st.bar_chart(
     x='Island', 
     y='Bill Length (mm)'
 )
+
+st.write(f'You selected: {selected_species}')
+
 # Island vs Body Mass; creates dictionary to rename variables to avoid renaming axis later on
 island_options = ['Biscoe', 'Dream', 'Torgersen']
 selected_island = st.selectbox('Choose an option:', options=island_options)
