@@ -77,17 +77,8 @@ boxplot = sns.boxplot(
 st.pyplot(boxplot.get_figure())
 
 # Same as previous; quantifying phenotypical differences 
-st.title("Average Bill Length by Species")
-avg_bill = (
-    filtered2_df
-    .groupby("Island", as_index=False)["Bill Length (mm)"]
-    .mean(numeric_only=True)
-)
-st.bar_chart(
-    avg_bill,
-    x="Species",
-    y="Bill Length (mm)",
-)
+st.bar_chart(filtered_df, x='island', y='bill_length_mm')
+
 # Island vs Body Mass; creates dictionary to rename variables to avoid renaming axis later on
 island_options = ['Biscoe', 'Dream', 'Torgersen']
 selected_island = st.selectbox('Choose an option:', options=island_options)
