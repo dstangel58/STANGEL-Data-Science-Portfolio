@@ -1,0 +1,2 @@
+### PROJECT OVERVIEW ### 
+In this project, I transform the raw dataset to track the relationships between the average value of comic book appearances over four decades and two categorical variables: platform and decade. By using tidy data principles, I changed the "wide" format of the data to include 
