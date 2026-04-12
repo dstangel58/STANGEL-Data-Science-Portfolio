@@ -118,12 +118,18 @@ input_data = {
 input_df = pd.DataFrame([input_data])
 input_df = input_df[X_test.columns]
 
-Y_pred_prob = model.predict_proba(input_df) # uses user input to generate result; replace X_test with something relating to radio buttons
-
+probabilities = best_model.predict_proba(input_df) # uses user input to generate result; replace X_test with something relating to radio buttons
 df_pred_prob = pd.DataFrame([input_data]) ## Basic structure; needs complexity from addition of radio buttons 
 
+display_df = pd.DataFrame({
+    'Democrat': [probabilities[0][0]],
+    'Republican': [probabilities[0][1]]
+})
+
 st.subheader('Predicted Political Party')
-st.dataframe(column_config={
+st.dataframe(
+            input_data, 
+            column_config={
                'Democrat': st.column_config.ProgressColumn(
                  'Democrat',
                  format='%f',
