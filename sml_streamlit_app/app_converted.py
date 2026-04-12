@@ -7,6 +7,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 import matplotlib.pyplot as plt
 
 df = pd.read_csv('/Users/duncanstangel/Documents/GitHub/STANGEL-Data-Science-Portfolio/sml_streamlit_app/congressional_voting_records.csv').dropna()
+st.dataframe(df)
 
 features = df[['handicapped-infants', 'water-project-cost-sharing', 'physician-fee-freeze', 
                'el-salvador-aid', 'religious-groups-in-schools', 'anti-satellite-test-ban',
@@ -62,16 +63,18 @@ grid_search = GridSearchCV(estimator = model,
                            scoring = 'recall',
                            verbose = 3)
 grid_search.fit(X_train, Y_train)
-print("Best parameters:", grid_search.best_params_)
-print("Best cross-validation score:", grid_search.best_score_)
+st.write("Best parameters:", grid_search.best_params_)
+st.write("Best cross-validation score:", grid_search.best_score_)
 
 best_model = grid_search.best_estimator_
 
 Y_pred = best_model.predict(X_test)
 
-print("Classification Report:")
-print(classification_report(Y_test, Y_pred))
+st.write("Classification Report:")
+st.write(classification_report(Y_test, Y_pred))
 
+st.header("Confusion Matrix")
+st.markdown("This matrix shows the accuracy of the best possible model based on optimal hyperparameters")
 cm = confusion_matrix(Y_test, Y_pred)
 plt.figure(figsize=(8, 6))
 heatmap = sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
@@ -97,22 +100,21 @@ duty_free_exports = st.radio("How would you vote on aa bill that reduces duty-fr
 export_administration_act_south_africa = st.radio("How would you vote on a bill that tightened rules regarding the export of dual-use (civilian that could be converted to military) technologies?", ['y', 'n'], key='export_poll')
 
 input_data = {
-    'handicapped-infants': 1 if 'handicapped-infants' == 'y' else 0,
-    'water-project-cost-sharing': 1 if 'water-project-cost-sharing' == 'y' else 0,
-    'adoption-of-the-budget-resolution': 1 if 'adoption-of-the-budget-resolution' == 'y' else 0,
-    'physician-fee-freeze': 1 if 'physician-fee-freeze' == 'y' else 0,
-    'el-salvador-aid': 1 if 'el-salvador-aid' == 'y' else 0,
-    'religious-groups-in-schools': 1 if 'religious-groups-in-schools' == 'y' else 0,
-    'anti-satellite-test-ban': 1 if 'anti-satellite-test-ban' == 'y' else 0,
-    'aid-to-nicaraguan-contras': 1 if 'aid-to-nicaraguan-contras' == 'y' else 0,
-    'mx-missile': 1 if 'mx-missile' == 'y' else 0,
-    'immigration': 1 if 'immigration' == 'y' else 0,
-    'synfuels-corporation-cutback': 1 if 'synfuels-corporation-cutback' == 'y' else 0,
-    'education-spending': 1 if 'education-spending' == 'y' else 0,
-    'superfund-right-to-sue': 1 if 'superfund-right-to-sue' == 'y' else 0,
-    'crime': 1 if crime == 'y' else 0,
-    'duty-free-exports': 1 if 'duty-free_-xports' == 'y' else 0,
-    'export-administration-act-south-africa': 1 if 'export-administration-act-south-africa' == 'y' else 0
+    'handicapped-infants': 1.0 if handicapped_infants == 'y' else 0.0,
+    'water-project-cost-sharing': 1.0 if water_project_cost_sharing == 'y' else 0.0,
+    'physician-fee-freeze': 1.0 if physician_fee_freeze == 'y' else 0.0,
+    'el-salvador-aid': 1.0 if el_salvador_aid == 'y' else 0.0,
+    'religious-groups-in-schools': 1.0 if religious_groups_in_schools == 'y' else 0.0,
+    'anti-satellite-test-ban': 1.0 if anti_satellite_test_ban == 'y' else 0.0,
+    'aid-to-nicaraguan-contras': 1.0 if aid_to_nicaraguan_contras == 'y' else 0.0,
+    'mx-missile': 1.0 if mx_missile == 'y' else 0.0,
+    'immigration': 1.0 if immigration == 'y' else 0.0,
+    'synfuels-corporation-cutback': 1.0 if synfuels_corporation_cutback == 'y' else 0.0,
+    'education-spending': 1.0 if education_spending == 'y' else 0.0,
+    'superfund-right-to-sue': 1.0 if superfund_right_to_sue == 'y' else 0.0,
+    'crime': 1.0 if crime == 'y' else 0.0,
+    'duty-free-exports': 1.0 if duty_free_exports == 'y' else 0.0,
+    'export-administration-act-south-africa': 1.0 if export_administration_act_south_africa == 'y' else 0.0
 }
 
 input_df = pd.DataFrame([input_data])
@@ -128,7 +130,7 @@ display_df = pd.DataFrame({
 
 st.subheader('Predicted Political Party')
 st.dataframe(
-            input_data, 
+            display_df, 
             column_config={
                'Democrat': st.column_config.ProgressColumn(
                  'Democrat',
