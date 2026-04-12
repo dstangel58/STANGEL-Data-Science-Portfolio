@@ -1,15 +1,10 @@
-
-# In[14]:
-
-
 import pandas as pd 
 import streamlit as st 
+import seaborn as sns
 import numpy as np
 import sklearn as sk
-
-
-# In[ ]:
-
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+import matplotlib.pyplot as plt
 
 df = pd.read_csv('/Users/duncanstangel/Documents/GitHub/STANGEL-Data-Science-Portfolio/sml_streamlit_app/congressional_voting_records.csv').dropna()
 
@@ -19,17 +14,11 @@ features = df[['handicapped-infants', 'water-project-cost-sharing', 'physician-f
                'education-spending', 'superfund-right-to-sue', 'crime', 'duty-free-exports', 
                'export-administration-act-south-africa']] #laws can be more broadly generalized into buckets like "environmental_regulation" and "trade_deals", this allows for more generalizability for future datasets
 X = features
-Y = df['party'] 
-df.head(5)
-
-
-# In[102]:
-
+Y = df['party']
 
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import mean_squared_error, root_mean_squared_error, r2_score
-
 
 vote_map = {
     'democrat' : 0.0,
@@ -50,20 +39,12 @@ model = DecisionTreeClassifier(random_state = 42, max_depth = 4)
 model.fit(X_train, Y_train)
 model.feature_importances_
 
-
-# In[ ]:
-
-
 import graphviz 
 from sklearn import tree 
 
 dot_data = tree.export_graphviz(model, feature_names = X.columns.tolist(), class_names=['democrat', 'republican'], filled=True)
 graph = graphviz.Source(dot_data)
 graph
-
-
-# In[ ]:
-
 
 from sklearn.model_selection import GridSearchCV
 
@@ -84,14 +65,6 @@ grid_search.fit(X_train, Y_train)
 print("Best parameters:", grid_search.best_params_)
 print("Best cross-validation score:", grid_search.best_score_)
 
-
-# In[108]:
-
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
-
 best_model = grid_search.best_estimator_
 
 Y_pred = best_model.predict(X_test)
@@ -105,22 +78,23 @@ heatmap = sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
 st.pyplot(heatmap.figure)
 
 st.header("Input Features") ## allows for radio button voting
-handicapped_infants = st.radio("How would you vote on ____?", ['y', 'n'])
-water_project_cost_sharing = st.radio("How would you vote on _____?", ['y', 'n'])
-adoption_of_the_budget_resolution = st.radio("How would you vote on _____?", ['y', 'n'])
-physician_fee_freeze = st.radio("How would you vote on _____?", ['y', 'n'])
-el_salvador_aid = st.radio("How would you vote on _____?", ['y', 'n'])
-religious_groups_in_schools = st.radio("How would you vote on _____?", ['y', 'n'])
-anti_satellite_test_ban = st.radio("How would you vote on _____?", ['y', 'n'])
-aid_to_nicaraguan_contras = st.radio("How would you vote on _____?", ['y', 'n'])
-mx_missile = st.radio("How would you vote on _____?", ['y', 'n'])
-immigration = st.radio("How would you vote on _____?", ['y', 'n'])
-synfuels_corporation_cutback = st.radio("How would you vote on _____?", ['y', 'n'])
-education_spending = st.radio("How would you vote on _____?", ['y', 'n'])
-superfund_right_to_sue = st.radio("How would you vote on _____?", ['y', 'n'])
-crime = st.radio("How would you vote on _____?", ['y', 'n'])
-duty_free_exports = st.radio("How would you vote on _____?", ['y', 'n'])
-export_administration_act_south_africa = st.radio("How would you vote on _____?", ['y', 'n'])
+st.markdown('Here, you can vote on issues as if you were a member of Congress in 1984. Based on party positions at the time, the model will predict what political party you would have belonged to')
+handicapped_infants = st.radio("How would you vote on a bill making the neglect of children with disabilities a child abuse crime?", ['y', 'n'], key='infant_poll')
+water_project_cost_sharing = st.radio("How would you vote on a bill that shifts waterway projct funding away from the federal government and toward local sources?", ['y', 'n'], key='water_poll')
+adoption_of_the_budget_resolution = st.radio("How would you vote on a bill that reduces the budget deficit by increasing defense spending and restructuring entitlement?", ['y', 'n'], key='budget_poll')
+physician_fee_freeze = st.radio("How would you vote on a bill that suspended medicare payments to physicians for 15 months to reduce inflation in expenditures?", ['y', 'n'],key='physicial_poll')
+el_salvador_aid = st.radio("How would you vote on a bill that supports the government of El Salvador during the civil war?", ['y', 'n'], key='el_salvador_poll')
+religious_groups_in_schools = st.radio("How would you vote on a bill that ensures religious student organizations have equal access to resources as nonreligious organizations?", ['y', 'n'], key='religious_groups_poll')
+anti_satellite_test_ban = st.radio("How would you vote on a bill that halts the testing of satellite weapons in space?", ['y', 'n'], key='satellite_poll')
+aid_to_nicaraguan_contras = st.radio("How would you vote on legislation that limits aid to Nicaraguan Contras?", ['y', 'n'], key='contras_poll')
+mx_missile = st.radio("How would you vote on the program to support MX (Peacekeeper) Missiles?", ['y', 'n'], key='mx_poll')
+immigration = st.radio("How would you vote on immigration legislation that provides sanctions for employers that knowingly hire undocumented immigrants, amnesty for some undocumented groups, a guest worker program for agriculture, and increased funding for broder protection services?", ['y', 'n'], key='immigration_poll')
+synfuels_corporation_cutback = st.radio("How would you vote on a bill that cutback on US projects exploring synthetic fuels?", ['y', 'n'], key='synfuels_poll')
+education_spending = st.radio("How would you vote on a bill that supports magnet programs alongside math, science, and foreign language instruction?", ['y', 'n'], key='education_poll')
+superfund_right_to_sue = st.radio("How would you vote on a bill that allows citizens to sue for violations of Superfund law with a longer time horizon after exposure, but lacking compensation provisions for victims of toxic waste exposure?", ['y', 'n'], key='superfund_poll')
+crime = st.radio("How would you vote on a bill that implements mandatory minimum sentences, abolished federal parole, and allows for limited pretrial detention?", ['y', 'n'], key='crime_poll')
+duty_free_exports = st.radio("How would you vote on aa bill that reduces duty-free access for developing nations in an effort to reduce trade deficits?", ['y', 'n'], key='exports_poll')
+export_administration_act_south_africa = st.radio("How would you vote on a bill that tightened rules regarding the export of dual-use (civilian that could be converted to military) technologies?", ['y', 'n'], key='export_poll')
 
 input_data = {
     'handicapped-infants': 1 if 'handicapped-infants' == 'y' else 0,
