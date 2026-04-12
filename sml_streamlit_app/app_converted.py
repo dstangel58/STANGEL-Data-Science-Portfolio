@@ -5,8 +5,28 @@ import numpy as np
 import sklearn as sk
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 import matplotlib.pyplot as plt
+import pathlib
+import tomli as tomllib  
+
+# 1. Get the directory where THIS script (app_converted.py) is located
+# __file__ is a built-in variable that points to the current file
+current_dir = pathlib.Path(__file__).parent 
+
+# 2. Build the path to the config file
+# We use the / operator to join the current folder with the subfolders
+config_path = current_dir / ".streamlit" / "config.toml"
+
+# 3. Load the file safely
+try:
+    with open(config_path, "rb") as f:
+        config = tomllib.load(f)
+    st.success(f"Successfully loaded config from: {config_path}")
+except FileNotFoundError:
+    st.error(f"Could not find config.toml at {config_path}. Check your folder structure!")
+    config = {} # Create an empty dict so the rest of the app doesn't crash
 
 df = pd.read_csv('/Users/duncanstangel/Documents/GitHub/STANGEL-Data-Science-Portfolio/sml_streamlit_app/congressional_voting_records.csv').dropna()
+st.header('Raw Data')
 st.dataframe(df)
 
 features = df[['handicapped-infants', 'water-project-cost-sharing', 'physician-fee-freeze', 
@@ -23,28 +43,28 @@ from sklearn.metrics import mean_squared_error, root_mean_squared_error, r2_scor
 
 vote_map = {
     'democrat' : 0.0,
-    'republican' : 1.0}
+    'republican' : 1.0} # converts strings to floats 
 feature_map = {
     'y' : 1.0,
     'n' : 0.0,
-    '?' : 0.5}
+    '?' : 0.5} # converts strings to floats 
 
-X_numeric = X.replace(feature_map)
+X_numeric = X.replace(feature_map) # incorporates dictionaries 
 Y_numeric = Y.replace(vote_map)
 
 X_train, X_test, Y_train, Y_test = train_test_split(X_numeric, Y_numeric,
                                                     test_size=0.2,
                                                     random_state=42)
 
-model = DecisionTreeClassifier(random_state = 42, max_depth = 4)
+model = DecisionTreeClassifier(random_state = 42, max_depth = 4) #limits max depth to prevent overfitting 
 model.fit(X_train, Y_train)
-model.feature_importances_
+model.feature_importances_ 
 
 import graphviz 
 from sklearn import tree 
 
 dot_data = tree.export_graphviz(model, feature_names = X.columns.tolist(), class_names=['democrat', 'republican'], filled=True)
-graph = graphviz.Source(dot_data)
+graph = graphviz.Source(dot_data) 
 graph
 
 from sklearn.model_selection import GridSearchCV
@@ -71,7 +91,9 @@ best_model = grid_search.best_estimator_
 Y_pred = best_model.predict(X_test)
 
 st.write("Classification Report:")
-st.write(classification_report(Y_test, Y_pred))
+report = classification_report(Y_test, Y_pred, output_dict=True)
+class_df = pd.DataFrame(report).transpose()
+st.table(class_df)
 
 st.header("Confusion Matrix")
 st.markdown("This matrix shows the accuracy of the best possible model based on optimal hyperparameters")
@@ -120,15 +142,15 @@ input_data = {
 input_df = pd.DataFrame([input_data])
 input_df = input_df[X_test.columns]
 
-probabilities = best_model.predict_proba(input_df) # uses user input to generate result; replace X_test with something relating to radio buttons
-df_pred_prob = pd.DataFrame([input_data]) ## Basic structure; needs complexity from addition of radio buttons 
+probabilities = best_model.predict_proba(input_df) # uses input_df to data type errors 
+df_pred_prob = pd.DataFrame([input_data]) # Tied into radio button dictionary  
 
 display_df = pd.DataFrame({
     'Democrat': [probabilities[0][0]],
     'Republican': [probabilities[0][1]]
-})
+}) # codes probability that an individual belongs to one party or another
 
-st.subheader('Predicted Political Party')
+st.subheader('Predicted Political Party') # displays how much an individual is likely to belong to a party
 st.dataframe(
             display_df, 
             column_config={
