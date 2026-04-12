@@ -7,13 +7,16 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 import matplotlib.pyplot as plt
 import pathlib
 import tomli as tomllib  
+import time as time
 
 st.header('Congress in 1984')
 st.markdown('At the tail-end of the Cold War, the US Congress was grappling with a divided government, environmental damange, foreign trade, and intervention in Central America. Through this model, you get the opportunity to cast your own ballot!')
 
+
 # 1. Get the directory where THIS script (app_converted.py) is located
 # __file__ is a built-in variable that points to the current file
 base_dir = pathlib.Path(__file__).parent 
+csv_path = base_dir / 'congressional_voting_records.csv'
 
 # 2. Build the path to the config file
 # We use the / operator to join the current folder with the subfolders
@@ -31,8 +34,13 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(['Raw Data', 'Model', 'Classification Rep
 with tab1: 
     st.header('Raw Data')
     st.write('View the original dataset here.')
-    df = pd.read_csv('/Users/duncanstangel/Documents/GitHub/STANGEL-Data-Science-Portfolio/sml_streamlit_app/congressional_voting_records.csv').dropna()
-    df
+    @st.cache_data
+    def load_and_clean_data():
+        csv_path = base_dir / 'congressional_voting_records.csv'
+        df = pd.read_csv(csv_path).dropna()
+        return df
+    df = load_and_clean_data()
+    st.dataframe(df, use_container_width=True)
 with tab2: 
     st.header('Model')
     st.write('Take a look at the optimized decision tree model below.')
@@ -96,7 +104,6 @@ with tab2:
     st.write("Best cross-validation score:", grid_search.best_score_)
 
     best_model = grid_search.best_estimator_
-
     Y_pred = best_model.predict(X_test)
 with tab3: 
     st.header("Classification Report:")
@@ -152,6 +159,10 @@ with tab5:
 
     input_df = pd.DataFrame([input_data])
     input_df = input_df[X_test.columns]
+
+    with st.spinner('Predicting your party...'):
+        time.sleep(1) 
+        st.success('Done!')
 
     probabilities = best_model.predict_proba(input_df) # uses input_df to data type errors 
     df_pred_prob = pd.DataFrame([input_data]) # Tied into radio button dictionary  
