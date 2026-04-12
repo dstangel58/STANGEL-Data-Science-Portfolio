@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 import pathlib
 import tomli as tomllib  
 
+st.header('Congress in 1984')
+st.markdown('At the tail-end of the Cold War, the US Congress was grappling with a divided government, environmental damange, foreign trade, and intervention in Central America. Through this model, you get the opportunity to cast your own ballot!')
+
 # 1. Get the directory where THIS script (app_converted.py) is located
 # __file__ is a built-in variable that points to the current file
 base_dir = pathlib.Path(__file__).parent 
@@ -29,6 +32,7 @@ with tab1:
     st.header('Raw Data')
     st.write('View the original dataset here.')
     df = pd.read_csv('/Users/duncanstangel/Documents/GitHub/STANGEL-Data-Science-Portfolio/sml_streamlit_app/congressional_voting_records.csv').dropna()
+    df
 with tab2: 
     st.header('Model')
     st.write('Take a look at the optimized decision tree model below.')
@@ -52,7 +56,8 @@ with tab2:
     feature_map = {
         'y' : 1.0,
         'n' : 0.0,
-        '?' : 0.5} # converts strings to floats 
+        '?' : 0.5
+        } # converts strings to floats 
 
     X_numeric = X.replace(feature_map) # incorporates dictionaries 
     Y_numeric = Y.replace(vote_map)
