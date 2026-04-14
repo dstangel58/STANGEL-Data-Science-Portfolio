@@ -12,7 +12,6 @@ import time as time
 st.header('Congress in 1984')
 st.markdown('At the tail-end of the Cold War, the US Congress was grappling with a divided government, environmental damange, foreign trade, and intervention in Central America. Through this model, you get the opportunity to cast your own ballot!')
 
-
 # 1. Get the directory where THIS script (app_converted.py) is located
 # __file__ is a built-in variable that points to the current file
 base_dir = pathlib.Path(__file__).parent 
@@ -33,8 +32,7 @@ except FileNotFoundError:
 tab1, tab2, tab3, tab4, tab5 = st.tabs(['Raw Data', 'Model', 'Classification Report', 'Confusion Matrix', 'Quiz'])
 with tab1: 
     st.header('Raw Data')
-    st.write('View the original dataset here.')
-    @st.cache_data
+    st.write('The original dataset contains the votes of each member of Congress across 16 pieces of legislation. Every value is a yes or no answer.')
     def load_and_clean_data():
         csv_path = base_dir / 'congressional_voting_records.csv'
         df = pd.read_csv(csv_path).dropna()
@@ -49,7 +47,7 @@ with tab2:
                'el-salvador-aid', 'religious-groups-in-schools', 'anti-satellite-test-ban',
                'aid-to-nicaraguan-contras', 'mx-missile', 'immigration', 'synfuels-corporation-cutback',
                'education-spending', 'superfund-right-to-sue', 'crime', 'duty-free-exports', 
-               'export-administration-act-south-africa']] #laws can be more broadly generalized into buckets like "environmental_regulation" and "trade_deals", this allows for more generalizability for future datasets
+               'export-administration-act-south-africa']] 
     X = features
     Y = df['party']
     # Model Creation 
@@ -74,7 +72,7 @@ with tab2:
                                                         test_size=0.2,
                                                         random_state=42)
 
-    model = DecisionTreeClassifier(random_state = 42, max_depth = 5) #limits max depth to prevent overfitting 
+    model = DecisionTreeClassifier(random_state = 42, max_depth = 3) # limits max depth to prevent overfitting 
     model.fit(X_train, Y_train)
 
     import graphviz 
@@ -82,23 +80,23 @@ with tab2:
 
     dot_data = tree.export_graphviz(model, feature_names = X.columns.tolist(), class_names=['democrat', 'republican'], filled=True)
     graph = graphviz.Source(dot_data) 
-    graph
+    st.graphviz_chart(graph)
 
     from sklearn.model_selection import GridSearchCV
 
     param_grid = {
         'criterion': ['gini', 'entropy', 'log_loss'],
         'max_depth': [2, 3, 4, 5],
-        'min_samples_split': [2, 3, 4, 5, 6],
-        'min_samples_leaf': [2, 3, 4, 5, 6],
+        'min_samples_split': [2, 3, 4, 5],
+        'min_samples_leaf': [2, 3, 4, 5],
         'class_weight' : [None, 'balanced']
     }
 
     grid_search = GridSearchCV(estimator = model,
                             param_grid = param_grid,
                             cv = 5,
-                            scoring = 'recall',
-                            verbose = 3)
+                            scoring = 'f1',
+                            verbose = 0)
     grid_search.fit(X_train, Y_train)
     st.write("Best parameters:", grid_search.best_params_)
     st.write("Best cross-validation score:", grid_search.best_score_)
@@ -123,12 +121,12 @@ with tab5:
     st.header("Input Features") ## allows for radio button voting
     st.markdown('Here, you can vote on issues as if you were a member of Congress in 1984. Based on party positions at the time, the model will predict what political party you would have belonged to')
     handicapped_infants = st.radio("How would you vote on a bill making the neglect of children with disabilities a child abuse crime?", ['y', 'n'], key='infant_poll')
-    water_project_cost_sharing = st.radio("How would you vote on a bill that shifts waterway projct funding away from the federal government and toward local sources?", ['y', 'n'], key='water_poll')
+    water_project_cost_sharing = st.radio("How would you vote on a bill that requires waterway projects to be funded by local sources, rather than the federal government?", ['y', 'n'], key='water_poll')
     adoption_of_the_budget_resolution = st.radio("How would you vote on a bill that reduces the budget deficit by increasing defense spending and restructuring entitlement?", ['y', 'n'], key='budget_poll')
     physician_fee_freeze = st.radio("How would you vote on a bill that suspended medicare payments to physicians for 15 months to reduce inflation in expenditures?", ['y', 'n'],key='physicial_poll')
     el_salvador_aid = st.radio("How would you vote on a bill that supports the government of El Salvador during the civil war?", ['y', 'n'], key='el_salvador_poll')
-    religious_groups_in_schools = st.radio("How would you vote on a bill that ensures religious student organizations have equal access to resources as nonreligious organizations?", ['y', 'n'], key='religious_groups_poll')
-    anti_satellite_test_ban = st.radio("How would you vote on a bill that halts the testing of satellite weapons in space?", ['y', 'n'], key='satellite_poll')
+    religious_groups_in_schools = st.radio("How would you vote on a bill that ensures religious student organizations have the same access to financial resources as nonreligious student organizations?", ['y', 'n'], key='religious_groups_poll')
+    anti_satellite_test_ban = st.radio("How would you vote on a bill that halts the testing of satellite weaponry in space?", ['y', 'n'], key='satellite_poll')
     aid_to_nicaraguan_contras = st.radio("How would you vote on legislation that limits aid to Nicaraguan Contras?", ['y', 'n'], key='contras_poll')
     mx_missile = st.radio("How would you vote on the program to support MX (Peacekeeper) Missiles?", ['y', 'n'], key='mx_poll')
     immigration = st.radio("How would you vote on immigration legislation that provides sanctions for employers that knowingly hire undocumented immigrants, amnesty for some undocumented groups, a guest worker program for agriculture, and increased funding for broder protection services?", ['y', 'n'], key='immigration_poll')
@@ -136,7 +134,7 @@ with tab5:
     education_spending = st.radio("How would you vote on a bill that supports magnet programs alongside math, science, and foreign language instruction?", ['y', 'n'], key='education_poll')
     superfund_right_to_sue = st.radio("How would you vote on a bill that allows citizens to sue for violations of Superfund law with a longer time horizon after exposure, but lacking compensation provisions for victims of toxic waste exposure?", ['y', 'n'], key='superfund_poll')
     crime = st.radio("How would you vote on a bill that implements mandatory minimum sentences, abolished federal parole, and allows for limited pretrial detention?", ['y', 'n'], key='crime_poll')
-    duty_free_exports = st.radio("How would you vote on aa bill that reduces duty-free access for developing nations in an effort to reduce trade deficits?", ['y', 'n'], key='exports_poll')
+    duty_free_exports = st.radio("How would you vote on a bill that reduces duty-free access for developing nations in an effort to reduce trade deficits?", ['y', 'n'], key='exports_poll')
     export_administration_act_south_africa = st.radio("How would you vote on a bill that tightened rules regarding the export of dual-use (civilian that could be converted to military) technologies?", ['y', 'n'], key='export_poll')
 
     input_data = {
