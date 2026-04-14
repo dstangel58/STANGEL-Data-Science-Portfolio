@@ -9,6 +9,8 @@ import pathlib
 import tomli as tomllib  
 import time as time #lots of packages are required; found packages to fit the task, rather than fitting the task to the packages I knew
 
+# learned how to use config.toml file to change app color 
+
 st.header('Congress in 1984')
 st.markdown('At the tail-end of the Cold War, the US Congress was grappling with a divided government, environmental damange, foreign trade, and intervention in Central America. Through this model, you get the opportunity to cast your own ballot!')
 
