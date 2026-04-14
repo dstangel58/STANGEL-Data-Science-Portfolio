@@ -7,31 +7,24 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 import matplotlib.pyplot as plt
 import pathlib
 import tomli as tomllib  
-import time as time
+import time as time #lots of packages are required; found packages to fit the task, rather than fitting the task to the packages I knew
 
 st.header('Congress in 1984')
 st.markdown('At the tail-end of the Cold War, the US Congress was grappling with a divided government, environmental damange, foreign trade, and intervention in Central America. Through this model, you get the opportunity to cast your own ballot!')
 
-# 1. Get the directory where THIS script (app_converted.py) is located
-# __file__ is a built-in variable that points to the current file
-base_dir = pathlib.Path(__file__).parent 
+base_dir = pathlib.Path(__file__).parent # able to access file from any computer without breaking
 csv_path = base_dir / 'congressional_voting_records.csv'
-
-# 2. Build the path to the config file
-# We use the / operator to join the current folder with the subfolders
 config_path = base_dir/'.streamlit'/'config.toml'
-
-# 3. Load the file safely
 try:
     with open(config_path, "rb") as f:
         config = tomllib.load(f)
 except FileNotFoundError:
     st.error(f"Could not find config.toml at {config_path}. Check your folder structure!")
-    config = {} # Create an empty dict so the rest of the app doesn't crash
+    config = {} # creates an empty dict so the rest of the app doesn't crash
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(['Raw Data', 'Model', 'Classification Report', 'Confusion Matrix', 'Quiz'])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(['Raw Data', 'Model', 'Classification Report', 'Confusion Matrix', 'Quiz']) # uses tabs to prevent a doomscrolling mess
 with tab1: 
-    st.header('Raw Data')
+    st.header('Raw Data') # basic overview 
     st.write('The original dataset contains the votes of each member of Congress across 16 pieces of legislation. Every value is a yes or no answer.')
     def load_and_clean_data():
         csv_path = base_dir / 'congressional_voting_records.csv'
@@ -39,7 +32,7 @@ with tab1:
         return df
     df = load_and_clean_data()
     st.dataframe(df, use_container_width=True)
-with tab2: 
+with tab2: # the model itself; decision tree used to organize categorical data 
     st.header('Model')
     st.write('Take a look at the optimized decision tree model below.')
     # Preprocessing
@@ -50,6 +43,7 @@ with tab2:
                'export-administration-act-south-africa']] 
     X = features
     Y = df['party']
+
     # Model Creation 
     from sklearn.model_selection import train_test_split
     from sklearn.tree import DecisionTreeClassifier
@@ -72,7 +66,7 @@ with tab2:
                                                         test_size=0.2,
                                                         random_state=42)
 
-    model = DecisionTreeClassifier(random_state = 42, max_depth = 3) # limits max depth to prevent overfitting 
+    model = DecisionTreeClassifier(random_state = 42, max_depth = 3) # limits max depth to prevent overfitting and protecting generalizability 
     model.fit(X_train, Y_train)
 
     import graphviz 
@@ -90,39 +84,60 @@ with tab2:
         'min_samples_split': [2, 3, 4, 5],
         'min_samples_leaf': [2, 3, 4, 5],
         'class_weight' : [None, 'balanced']
-    }
+    } 
 
     grid_search = GridSearchCV(estimator = model,
                             param_grid = param_grid,
                             cv = 5,
-                            scoring = 'f1',
+                            scoring = 'f1', # both false positives and false negatives are equally unhelpful for identifying political party--especially in the case of predicting votes based on political orientation
                             verbose = 0)
     grid_search.fit(X_train, Y_train)
     st.write("Best parameters:", grid_search.best_params_)
     st.write("Best cross-validation score:", grid_search.best_score_)
 
-    best_model = grid_search.best_estimator_
+    best_model = grid_search.best_estimator_ 
     Y_pred = best_model.predict(X_test)
 with tab3: 
-    st.header("Classification Report:")
+    st.header("Classification Report:")  
     report = classification_report(Y_test, Y_pred, output_dict=True)
     class_df = pd.DataFrame(report).transpose()
     st.table(class_df)
+
+    df_melted = df.melt( # melts the data to make it optimal for graphing 
+        id_vars=['party'],
+        value_vars=features.columns.tolist(), #features is a dataframe; needed to specify for columns 
+        var_name="Bill_name",
+        value_name='vote'
+    )
+
+    fig, ax = plt.subplots(figsize=(10, 10)) # had to incorporate plotly to connect seaborn plot to streamlit interface 
+    sns.countplot(
+        data=df_melted, 
+        y="Bill_name", 
+        hue="vote", 
+        palette="inferno",
+        ax=ax
+    )
+    
+    ax.set_title("Total Yes/No/? Counts per Legislation")
+    st.pyplot(fig) 
+
 with tab4: 
-    st.header("Confusion Matrix")
+    st.header("Confusion Matrix") # basic heatmap for confusion matrix
     st.markdown("This matrix shows the accuracy of the best possible model based on optimal hyperparameters")
     cm = confusion_matrix(Y_test, Y_pred)
     plt.figure(figsize=(8, 6))
     heatmap = sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
     st.pyplot(heatmap.figure)
+
 with tab5: 
     st.header('Quiz Yourself')
     st.write('Take the Quiz!')
-    st.header("Input Features") ## allows for radio button voting
+    st.header("Input Features") # allows for radio button voting; enormous list of radio buttons describing bills; each given a different identifier so streamlit can incorporate them
     st.markdown('Here, you can vote on issues as if you were a member of Congress in 1984. Based on party positions at the time, the model will predict what political party you would have belonged to')
     handicapped_infants = st.radio("How would you vote on a bill making the neglect of children with disabilities a child abuse crime?", ['y', 'n'], key='infant_poll')
     water_project_cost_sharing = st.radio("How would you vote on a bill that requires waterway projects to be funded by local sources, rather than the federal government?", ['y', 'n'], key='water_poll')
-    adoption_of_the_budget_resolution = st.radio("How would you vote on a bill that reduces the budget deficit by increasing defense spending and restructuring entitlement?", ['y', 'n'], key='budget_poll')
+    adoption_of_the_budget_resolution = st.radio("How would you vote on a bill that reduces the budget deficit by increasing defense spending and restructuring entitlement programs?", ['y', 'n'], key='budget_poll')
     physician_fee_freeze = st.radio("How would you vote on a bill that suspended medicare payments to physicians for 15 months to reduce inflation in expenditures?", ['y', 'n'],key='physicial_poll')
     el_salvador_aid = st.radio("How would you vote on a bill that supports the government of El Salvador during the civil war?", ['y', 'n'], key='el_salvador_poll')
     religious_groups_in_schools = st.radio("How would you vote on a bill that ensures religious student organizations have the same access to financial resources as nonreligious student organizations?", ['y', 'n'], key='religious_groups_poll')
@@ -137,7 +152,7 @@ with tab5:
     duty_free_exports = st.radio("How would you vote on a bill that reduces duty-free access for developing nations in an effort to reduce trade deficits?", ['y', 'n'], key='exports_poll')
     export_administration_act_south_africa = st.radio("How would you vote on a bill that tightened rules regarding the export of dual-use (civilian that could be converted to military) technologies?", ['y', 'n'], key='export_poll')
 
-    input_data = {
+    input_data = { # creates yes/no input structure 
         'handicapped-infants': 1.0 if handicapped_infants == 'y' else 0.0,
         'water-project-cost-sharing': 1.0 if water_project_cost_sharing == 'y' else 0.0,
         'physician-fee-freeze': 1.0 if physician_fee_freeze == 'y' else 0.0,
@@ -158,21 +173,17 @@ with tab5:
     input_df = pd.DataFrame([input_data])
     input_df = input_df[X_test.columns]
 
-    with st.spinner('Predicting your party...'):
-        time.sleep(1) 
-        st.success('Done!')
-
     probabilities = best_model.predict_proba(input_df) # uses input_df to data type errors 
     df_pred_prob = pd.DataFrame([input_data]) # Tied into radio button dictionary  
 
-    display_df = pd.DataFrame({
+    display_df = pd.DataFrame({ # drastic swings based on data; specifically physician fee freeze (showing it was a contentious and partisan issue)
         'Democrat': [probabilities[0][0]],
         'Republican': [probabilities[0][1]]
     }) # codes probability that an individual belongs to one party or another
 
     st.subheader('Predicted Political Party') # displays how much an individual is likely to belong to a party
     st.dataframe(
-                display_df, 
+                display_df, # displays percentage chance of belonging to one party or another
                 column_config={
                 'Democrat': st.column_config.ProgressColumn(
                     'Democrat',
