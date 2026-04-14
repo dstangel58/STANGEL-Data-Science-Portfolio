@@ -48,7 +48,7 @@ with tab2: # the model itself; decision tree used to organize categorical data
 
     # Model Creation 
     from sklearn.model_selection import train_test_split
-    from sklearn.tree import DecisionTreeClassifier
+    from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
     from sklearn.metrics import mean_squared_error, root_mean_squared_error, r2_score
 
     vote_map = {
@@ -68,7 +68,7 @@ with tab2: # the model itself; decision tree used to organize categorical data
                                                         test_size=0.2,
                                                         random_state=42)
 
-    model = DecisionTreeClassifier(random_state = 42, max_depth = 4) # limits max depth to prevent overfitting and protecting generalizability 
+    model = DecisionTreeRegressor(random_state = 42, max_depth = 4) # limits max depth to prevent overfitting and protecting generalizability 
     model.fit(X_train, Y_train)
 
     import graphviz 
