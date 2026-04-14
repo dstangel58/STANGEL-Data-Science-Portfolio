@@ -1,8 +1,8 @@
-graphviz==0.21
-matplotlib==3.10.8
-numpy==2.4.4
-pandas==3.0.2
-scikit_learn==1.8.0
-seaborn==0.13.2
-streamlit==1.53.1
-tomli==2.4.1
+graphviz
+matplotlib
+numpy
+pandas
+scikit_learn
+seaborn
+streamlit
+tomli
