@@ -136,10 +136,3 @@ wcwidth @ file:///home/conda/feedstock_root/build_artifacts/wcwidth_177063452528
 wheel==0.45.1
 xgboost @ file:///opt/miniconda3/conda-bld/xgboost-split_1764761340699/work/python-package
 zstandard @ file:///opt/miniconda3/conda-bld/zstandard_1758189078532/work
-pandas
-streamlit
-scikit-learn
-matplotlib
-seaborn
-graphviz
-numpy
