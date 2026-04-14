@@ -68,7 +68,7 @@ with tab2: # the model itself; decision tree used to organize categorical data
                                                         test_size=0.2,
                                                         random_state=42)
 
-    model = DecisionTreeClassifier(random_state = 42, max_depth = 3) # limits max depth to prevent overfitting and protecting generalizability 
+    model = DecisionTreeClassifier(random_state = 42, max_depth = 4) # limits max depth to prevent overfitting and protecting generalizability 
     model.fit(X_train, Y_train)
 
     import graphviz 
