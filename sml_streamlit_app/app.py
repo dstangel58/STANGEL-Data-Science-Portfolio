@@ -25,7 +25,9 @@ except FileNotFoundError:
     st.error(f"Could not find config.toml at {config_path}. Check your folder structure!")
     config = {} # creates an empty dict so the rest of the app doesn't crash
 
+# Tabs of the streamlit app
 tab1, tab2, tab3, tab4, tab5 = st.tabs(['Raw Data', 'Model', 'Classification Report', 'Confusion Matrix', 'Quiz']) # uses tabs to prevent a doomscrolling mess
+
 with tab1: 
     st.header('Raw Data') # basic overview 
     st.write('The original dataset contains the votes of each member of Congress across 16 pieces of legislation. Every value is a yes or no answer.')
@@ -42,37 +44,39 @@ with tab1:
     st.dataframe(df, use_container_width=True)
 
 with tab2: # the model itself; decision tree used to organize categorical data 
+
+    import graphviz 
+    from sklearn import tree 
+
+    # Model Creation 
+    from sklearn.model_selection import train_test_split
+    from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+    from sklearn.preprocessing import LabelEncoder
+
+    # Streamlit content
+
     st.header('Model')
     st.write('Take a look at the optimized decision tree model below.')
+
     # Preprocessing
     features = df[['handicapped-infants', 'water-project-cost-sharing', 'physician-fee-freeze', 
                'el-salvador-aid', 'religious-groups-in-schools', 'anti-satellite-test-ban',
                'aid-to-nicaraguan-contras', 'mx-missile', 'immigration', 'synfuels-corporation-cutback',
                'education-spending', 'superfund-right-to-sue', 'crime', 'duty-free-exports', 
                'export-administration-act-south-africa']] 
-
     X = features
-
-    """
-    from sklearn.preprocessing import LabelEncoder
 
     le = LabelEncoder()
     Y = le.fit_transform(df['party'])
 
-    # Model Creation 
-    from sklearn.model_selection import train_test_split
-    from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-    from sklearn.metrics import mean_squared_error, root_mean_squared_error, r2_score
-
+    # Make model stuff
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y,
                                                         test_size=0.2,
                                                         random_state=42)
 
+    # Decision tree classifier with max depth to prevent overfitting; also allows for better visualization and interpretability
     model = DecisionTreeClassifier(random_state = 42, max_depth=4) # limits max depth to prevent overfitting and protecting generalizability 
     model.fit(X_train, Y_train)
-    """
-    import graphviz 
-    from sklearn import tree 
 
     dot_data = tree.export_graphviz(model, feature_names = X.columns.tolist(), class_names=['democrat', 'republican'], filled=True)
     graph = graphviz.Source(dot_data) 
@@ -98,6 +102,8 @@ with tab2: # the model itself; decision tree used to organize categorical data
 
     best_model = grid_search.best_estimator_ 
     Y_pred = best_model.predict(X_test)
+
+
 with tab3: 
     st.header("Classification Report:")  
     report = classification_report(Y_test, Y_pred, target_names=['democrat', 'republican'], output_dict=True)
