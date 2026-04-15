@@ -52,20 +52,8 @@ with tab2: # the model itself; decision tree used to organize categorical data
     from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
     from sklearn.metrics import mean_squared_error, root_mean_squared_error, r2_score
 
-<<<<<<< HEAD
-    vote_map = {
-        'democrat' : 0,
-        'republican' : 1
-        } # converts strings to floats 
-    feature_map = {
-        'y' : 1.0,
-        'n' : 0.0,
-        '?' : 0.5
-        } # converts strings to floats 
-=======
     vote_map = {'democrat' : 0.0, 'republican' : 1.0} # converts strings to floats 
     feature_map = {'y' : 1.0,'n' : 0.0} # converts strings to floats 
->>>>>>> e4b9146 (Removed '?' Answers)
 
     X_numeric = X.replace(feature_map) # incorporates dictionaries 
     Y_numeric = Y.replace(vote_map)
@@ -74,11 +62,7 @@ with tab2: # the model itself; decision tree used to organize categorical data
                                                         test_size=0.2,
                                                         random_state=42)
 
-<<<<<<< HEAD
-    model = DecisionTreeRegressor(random_state = 42, max_depth = 4) # limits max depth to prevent overfitting and protecting generalizability 
-=======
     model = DecisionTreeClassifier(random_state = 42, max_depth=4) # limits max depth to prevent overfitting and protecting generalizability 
->>>>>>> e4b9146 (Removed '?' Answers)
     model.fit(X_train, Y_train)
 
     import graphviz 
