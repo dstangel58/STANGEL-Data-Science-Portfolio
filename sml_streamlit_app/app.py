@@ -31,6 +31,7 @@ with tab1:
     def load_and_clean_data():
         csv_path = base_dir / 'congressional_voting_records.csv'
         df = pd.read_csv(csv_path).dropna()
+        df = df[df!= '?']
         return df
     df = load_and_clean_data()
     st.dataframe(df, use_container_width=True)
@@ -51,6 +52,7 @@ with tab2: # the model itself; decision tree used to organize categorical data
     from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
     from sklearn.metrics import mean_squared_error, root_mean_squared_error, r2_score
 
+<<<<<<< HEAD
     vote_map = {
         'democrat' : 0,
         'republican' : 1
@@ -60,6 +62,10 @@ with tab2: # the model itself; decision tree used to organize categorical data
         'n' : 0.0,
         '?' : 0.5
         } # converts strings to floats 
+=======
+    vote_map = {'democrat' : 0.0, 'republican' : 1.0} # converts strings to floats 
+    feature_map = {'y' : 1.0,'n' : 0.0} # converts strings to floats 
+>>>>>>> e4b9146 (Removed '?' Answers)
 
     X_numeric = X.replace(feature_map) # incorporates dictionaries 
     Y_numeric = Y.replace(vote_map)
@@ -68,7 +74,11 @@ with tab2: # the model itself; decision tree used to organize categorical data
                                                         test_size=0.2,
                                                         random_state=42)
 
+<<<<<<< HEAD
     model = DecisionTreeRegressor(random_state = 42, max_depth = 4) # limits max depth to prevent overfitting and protecting generalizability 
+=======
+    model = DecisionTreeClassifier(random_state = 42, max_depth=4) # limits max depth to prevent overfitting and protecting generalizability 
+>>>>>>> e4b9146 (Removed '?' Answers)
     model.fit(X_train, Y_train)
 
     import graphviz 
@@ -81,12 +91,11 @@ with tab2: # the model itself; decision tree used to organize categorical data
     from sklearn.model_selection import GridSearchCV
 
     param_grid = {
-        'criterion': ['gini', 'entropy', 'log_loss'],
+        'criterion': ['gini', 'entropy'],
         'max_depth': [2, 3, 4, 5],
         'min_samples_split': [2, 3, 4, 5],
         'min_samples_leaf': [2, 3, 4, 5],
-        'class_weight' : [None, 'balanced']
-    } 
+        'class_weight': [None, 'balanced']}
 
     grid_search = GridSearchCV(estimator = model,
                             param_grid = param_grid,
@@ -101,9 +110,9 @@ with tab2: # the model itself; decision tree used to organize categorical data
     Y_pred = best_model.predict(X_test)
 with tab3: 
     st.header("Classification Report:")  
-    report = classification_report(Y_test, Y_pred, output_dict=True)
-    class_df = pd.DataFrame(report).transpose()
-    st.table(class_df)
+    report = classification_report(Y_test, Y_pred, target_names=['democrat', 'republican'], output_dict=True)
+    st.table(pd.DataFrame(report).transpose())
+    st.table(report)
 
     df_melted = df.melt( # melts the data to make it optimal for graphing 
         id_vars=['party'],
@@ -111,7 +120,7 @@ with tab3:
         var_name="Bill_name",
         value_name='vote'
     )
-
+    st.write(df_melted) #shows melted and clean data frame; much easier to read 
     fig, ax = plt.subplots(figsize=(10, 10)) # had to incorporate plotly to connect seaborn plot to streamlit interface 
     sns.countplot(
         data=df_melted, 
@@ -175,12 +184,12 @@ with tab5:
     input_df = pd.DataFrame([input_data])
     input_df = input_df[X_test.columns]
 
-    probabilities = best_model.predict_proba(input_df) # uses input_df to data type errors 
+    probabilities = best_model.predict_proba(input_df)[0] # uses input_df to data type errors 
     df_pred_prob = pd.DataFrame([input_data]) # Tied into radio button dictionary  
 
     display_df = pd.DataFrame({ # drastic swings based on data; specifically physician fee freeze (showing it was a contentious and partisan issue)
-        'Democrat': [probabilities[0][0]],
-        'Republican': [probabilities[0][1]]
+        'Democrat': [probabilities[0]],
+        'Republican': [probabilities[1]]
     }) # codes probability that an individual belongs to one party or another
 
     st.subheader('Predicted Political Party') # displays how much an individual is likely to belong to a party
