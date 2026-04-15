@@ -17,6 +17,7 @@ st.markdown('At the tail-end of the Cold War, the US Congress was grappling with
 base_dir = pathlib.Path(__file__).parent # able to access file from any computer without breaking
 csv_path = base_dir / 'congressional_voting_records.csv'
 config_path = base_dir/'.streamlit'/'config.toml'
+
 try:
     with open(config_path, "rb") as f:
         config = tomllib.load(f)
@@ -28,13 +29,18 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(['Raw Data', 'Model', 'Classification Rep
 with tab1: 
     st.header('Raw Data') # basic overview 
     st.write('The original dataset contains the votes of each member of Congress across 16 pieces of legislation. Every value is a yes or no answer.')
+    
     def load_and_clean_data():
         csv_path = base_dir / 'congressional_voting_records.csv'
-        df = pd.read_csv(csv_path).dropna()
+        df = pd.read_csv(csv_path)
+        df = df.replace({'y': 1.0, 'n': 0.0}) # converts yes/no to floats for modeling
+        df.dropna()
         df = df[df!= '?']
         return df
+    
     df = load_and_clean_data()
     st.dataframe(df, use_container_width=True)
+
 with tab2: # the model itself; decision tree used to organize categorical data 
     st.header('Model')
     st.write('Take a look at the optimized decision tree model below.')
@@ -44,27 +50,27 @@ with tab2: # the model itself; decision tree used to organize categorical data
                'aid-to-nicaraguan-contras', 'mx-missile', 'immigration', 'synfuels-corporation-cutback',
                'education-spending', 'superfund-right-to-sue', 'crime', 'duty-free-exports', 
                'export-administration-act-south-africa']] 
+
     X = features
-    Y = df['party']
+
+    """
+    from sklearn.preprocessing import LabelEncoder
+
+    le = LabelEncoder()
+    Y = le.fit_transform(df['party'])
 
     # Model Creation 
     from sklearn.model_selection import train_test_split
     from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
     from sklearn.metrics import mean_squared_error, root_mean_squared_error, r2_score
 
-    vote_map = {'democrat' : 0.0, 'republican' : 1.0} # converts strings to floats 
-    feature_map = {'y' : 1.0,'n' : 0.0} # converts strings to floats 
-
-    X_numeric = X.replace(feature_map) # incorporates dictionaries 
-    Y_numeric = Y.replace(vote_map)
-
-    X_train, X_test, Y_train, Y_test = train_test_split(X_numeric, Y_numeric,
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y,
                                                         test_size=0.2,
                                                         random_state=42)
 
     model = DecisionTreeClassifier(random_state = 42, max_depth=4) # limits max depth to prevent overfitting and protecting generalizability 
     model.fit(X_train, Y_train)
-
+    """
     import graphviz 
     from sklearn import tree 
 
