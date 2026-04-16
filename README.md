@@ -1,1 +1,26 @@
 This repository will contain all of my portfolio updates this semester. I aim for it to serve as a complete record of the knowledge I gain about Python in Spring 2026.
+
+### Penguins.csv ###
+In this dashboard, I create a streamlit application to compare penguins in the penguins.csv dataset with both distribution and trend analysis on the basis of features like bill length and body mass. This shows trends in species across islands. Both can be toggled in the application itself. It includes: 
+
+1) **Scatter Plots:**
+2) **Distribution Analysis** 
+3) **Trend Analysis:**
+
+### MUTANT MONEYBALL ### 
+In this project, I transform the raw dataset to track the relationships between the average value of comic book appearances over four decades and two categorical variables: platform and decade. By using tidy data principles, I changed the "wide" format of the data to a "narrow" one by using the pandas.melt() function. The analysis explores how the values of certain character appearnces change over time, compared to four main valuation methods: 
+1) Heritage Auctions
+2) eBay
+3) Wizard (Wiz)
+4) O Street
+
+While Heritage used highest individual sale price, the other platforms aggregated various average sale values over time. 
+
+### 🏛️ Congress 1984: Voting Records & Party Prediction ###
+
+This app uses streamlit to display congressional voting data from 1984. You can even vote on bills like a member of Congress from that session! Based on the 16 possible votes, you can view the decision tree classifier model to understand the level of partisanship in individual pieces of legislation. I used: 
+
+1) **Exploratory Data Analysis:**
+2) **Machine Learning Pipeline:**
+3) **Performance Metrics:**
+4) **Interactive Quiz:**

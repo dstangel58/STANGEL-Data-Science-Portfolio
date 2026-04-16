@@ -1,6 +1,6 @@
 # 🏛️ Congress 1984: Voting Records & Party Prediction
 
-This app uses streamlit to display congressional voting data from 1984. You can even vote on bills like a member of Congress from that session! 
+This app uses streamlit to display congressional voting data from 1984. You can even vote on bills like a member of Congress from that session! Based on the 16 possible votes, you can view the decision tree classifier model to understand the level of partisanship in individual pieces of legislation. 
 
 # Features 
 

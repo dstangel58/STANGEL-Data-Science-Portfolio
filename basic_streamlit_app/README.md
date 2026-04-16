@@ -1,5 +1,7 @@
 ## 🐧 Penguin Biology Dashboard 🐧
 
+In this dashboard, I create a streamlit application to compare penguins in the penguins.csv dataset with both distribution and trend analysis on the basis of features like bill length and body mass. This shows trends in species across islands. Both can be toggled in the application itself. 
+
 # 🚀 Features 🚀 
 **Filtering:** Uses the st.selectbox() function for all four categorical variables for maximum flexibility.
 **Key Metrics:** Performs real-time calculations of averages and other metrics, updating for species and island respectively. 
