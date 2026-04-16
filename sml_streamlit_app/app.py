@@ -141,7 +141,7 @@ with tab5:
     st.header('Quiz Yourself')
     st.write('Take the Quiz!')
     st.header("Input Features") # allows for radio button voting; enormous list of radio buttons describing bills; each given a different identifier so streamlit can incorporate them
-    st.markdown('Here, you can vote on issues as if you were a member of Congress in 1984. Based on party positions at the time, the model will predict what political party you would have belonged to')
+    st.markdown('Here, you can vote on issues as if you were a member of Congress in 1984. Based on party positions at the time, the model will predict what political party you would have belonged to.')
     handicapped_infants = st.radio("How would you vote on a bill making the neglect of children with disabilities a child abuse crime?", ['y', 'n'], key='infant_poll')
     water_project_cost_sharing = st.radio("How would you vote on a bill that requires waterway projects to be funded by local sources, rather than the federal government?", ['y', 'n'], key='water_poll')
     adoption_of_the_budget_resolution = st.radio("How would you vote on a bill that reduces the budget deficit by increasing defense spending and restructuring entitlement programs?", ['y', 'n'], key='budget_poll')
