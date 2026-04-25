@@ -10,7 +10,7 @@ df = pd.read_csv("data/penguins.csv")
 st.title("Penguin Biology By Island and Species")
 st.markdown("This penguins dashboard provides an in-depth look into the penguins.csv dataset using only 120 lines of code. Through this exploratory data analysis, new trends can be discovered regarding factors such as flipper length and bill length/depth (across both species and island).")
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(['Data', 'Bill Length vs Depth', 'Body Mass by Species', 'Bill Length by Island', 'Flipper Length vs. Body Mass'])
+tab1, tab2, tab3, tab4 = st.tabs(['Data', 'Bill Length vs Depth', 'Correlations', 'Flipper Length vs. Body Mass'])
 
 with tab1: 
     ## TAB 1 -- The Data 
@@ -79,19 +79,15 @@ with tab3:
         y = "Body Mass (g)",
         data = filtered2_df)
     st.pyplot(boxplot.get_figure())
+    
+    # Scatter chart of bil length and depth 
+    st.title("Bill Depth vs. Length")
+    st.scatter_chart(
+        data=filtered2_df,
+        x = 'Bill Depth (mm)',
+        y = 'Bill Length (mm)')
 
 with tab4: 
-    # TAB 4 -- Bill Length by Island 
-    # Same as previous; quantifying phenotypical differences 
-    st.title("Average Bill Length by Island")
-    # Pre-calculate the mean to ensure it's not a total
-    avg_df = filtered2_df.groupby('Island', as_index=False)['Bill Length (mm)'].mean()
-    st.bar_chart(
-        data=avg_df, 
-        x='Island', 
-        y='Bill Length (mm)')
-
-with tab5: 
     # TAB 5 -- Flipper Length vs. Body Mass
     st.write(f'You selected: {selected_species}')
 

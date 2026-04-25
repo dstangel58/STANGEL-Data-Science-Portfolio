@@ -1,6 +1,6 @@
 ## 🐧 Penguin Biology Dashboard 🐧
 
-In this dashboard, I create a streamlit application to compare penguins in the penguins.csv dataset with both distribution and trend analysis on the basis of features like bill length and body mass. This shows trends in species across islands. Both can be toggled in the application itself. 
+In this streamlit app, I use the penguins.csv dataset to compare various features including: bill length, bill depth, flipper length, among many more to discern trends. I display these using summary statistics, bar charts, and scatter plots. This shows the correlation between various features in the dataset.
 
 # 🚀 Features 🚀 
 **Filtering:** Uses the st.selectbox() function for all four categorical variables for maximum flexibility.
@@ -17,17 +17,17 @@ In this dashboard, I create a streamlit application to compare penguins in the p
 Dataset: penguins.csv 
 Libraries: Pandas, Seaborn, Streamlit
 Steps to Run: 
-Ensure you have the dataset: Place penguins.csv in a folder named data/.
-Install Libraries: pip install 
-pandas as pd 
-seaborn as sns
-streamlit as st
-Bash, streamlit run main.py
+    1. Ensure you have the dataset: Place penguins.csv in a folder named data/.
+    2. Install Libraries: pip install 
+    3. pandas as pd 
+    4. seaborn as sns
+    5. streamlit as st
+    6. ash, streamlit run main.py
 
 # 📊 Visualization Key
 _Quick summary of averages (Mean)_--**col#.metric** -- provides columns of summary statstics
 _Scatter Plot_ -- **st.scatter_chart** -- Analyzing relationships between two continuous variables.
-_Boxplot_ -- **sns.boxplot** -- Showing data distribution and outliers. (streamlit possesses not in-built version) 
+_Boxplot_ -- **sns.boxplot** -- Showing data distribution and outliers. (streamlit does not possess an in-built version) 
 _Bar Chart_ -- **st.bar_chart** -- Comparing aggregated averages across categories.
 
 
