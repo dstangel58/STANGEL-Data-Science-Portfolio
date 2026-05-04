@@ -9,40 +9,181 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans 
 from sklearn.decomposition import PCA 
 
-base_dir = Path(__file__).resolve().parent
-data_path = base_dir / 'data' / 'Country-data.csv' 
-import_data = pd.read_csv(data_path)
+tab1, tab2, tab3, tab4, tab5, = st.tabs(['Raw Data', 'Cluster Model', 'Income vs. Child Mortality', 'Live Expectancy vs. GDPP', 'Slider Projections'])
 
-X = import_data[['child_mort','exports','health', 'income', 'imports','inflation','life_expec','total_fer','gdpp']].values 
+with tab1: 
+    base_dir = Path(__file__).resolve().parent
+    data_path = base_dir / 'data' / 'Country-data.csv' 
+    import_data = pd.read_csv(data_path)
 
-scaler = StandardScaler()
-X_std = scaler.fit_transform(X) 
+    X = import_data[['child_mort','exports','health', 'income', 'imports','inflation','life_expec','total_fer','gdpp']].values 
+    st.dataframe(import_data)
 
-k = 3 
-kmeans = KMeans(n_clusters=k, random_state=42)
-clusters = kmeans.fit_predict(X_std)
+with tab2: 
+    scaler = StandardScaler()
+    X_std = scaler.fit_transform(X) 
 
-pca = PCA(n_components=2)
-X_pca = pca.fit_transform(X_std)
+    k = 3 
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    clusters = kmeans.fit_predict(X_std)
 
-plt.figure(figsize=(8,6))
+    pca = PCA(n_components=2)
+    X_pca = pca.fit_transform(X_std)
 
-for cluster_label in np.unique(clusters):
-    indices = np.where(clusters == cluster_label)
-    plt.scatter(X_pca[indices, 0], X_pca[indices, 1],
-                alpha=0.7, edgecolor='k', s=60, label=f'Cluster {cluster_label}')
-plt.xlabel('Principal Component 1') # life expectancy/income 
-plt.ylabel('Principal Component 2') #primarily trade (import/export) focused 
-plt.title('2D PCA Projection')
-plt.legend(loc='best')
-plt.grid(True)
+    st.write('The first principal component explains variance through income and life expectancy, while the variance of the second principal component is largely defined by trade: imports and exports.')
+    st.write(pca.components_)
 
-# TABS 
-    # Raw Data 
-        # st.dataframe(import_data)
-        # st.write('The first principal component explains variance through income and life expectancy, while the variance of the second principal component is largely defined by trade: imports and exports.')
-        # st.write(pca.components_)
-    # Income vs. Child Mortality (scatter plot in streamlit)
-    # Life Expectancy vs. GDPP (scatterplot in streamlit) 
-    # Cluster Model --> kmeans 
-    # Slider Bars with Predictions --> https://docs.streamlit.io/develop/api-reference/widgets/st.slider 
+    plt.figure(figsize=(8,6))
+
+    fig, ax = plt.subplots()
+
+    for cluster_label in np.unique(clusters):
+        indices = np.where(clusters == cluster_label)
+        plt.scatter(X_pca[indices, 0], X_pca[indices, 1],
+                    alpha=0.7, edgecolor='k', s=60, label=f'Cluster {cluster_label}')
+    plt.xlabel('Principal Component 1') # life expectancy/income 
+    plt.ylabel('Principal Component 2') #primarily trade (import/export) focused 
+    plt.title('2D PCA Projection')
+    plt.legend(loc='best')
+    plt.grid(True)
+    st.pyplot(fig)
+
+with tab3: 
+    st.scatter_chart(data=import_data, x='income', y='child_mort')
+
+with tab4: 
+    st.scatter_chart(data=import_data, x='income', y='life_expec')
+
+with tab5: 
+    st.write(import_data.min())
+    st.write(import_data.max())
+
+    # --- Child Mortality ---
+    min_val = int(import_data['child_mort'].min())
+    max_val = int(import_data['child_mort'].max())
+    midpoint = (min_val + max_val) // 2
+
+    child_mortality = st.slider(label='Child Mortality',
+                                min_value=min_val,
+                                max_value=max_val,
+                                value=midpoint,
+                                step=1,
+                                key='key_child_mort')
+    st.write(f'Child Mortality is equal to: {child_mortality}')
+
+    # --- Exports ---
+    min_val = int(import_data['exports'].min())
+    max_val = int(import_data['exports'].max())
+    midpoint = (min_val + max_val) // 2
+
+    exports = st.slider(label='Exports',
+                        min_value=min_val,
+                        max_value=max_val,
+                        value=midpoint,
+                        step=1,
+                        key='key_exports')
+    st.write(f'Exports are equal to: {exports}')
+
+    # --- Health ---
+    min_val = int(import_data['health'].min())
+    max_val = int(import_data['health'].max())
+    midpoint = (min_val + max_val) // 2
+
+    health = st.slider(label='Health',
+                        min_value=min_val,
+                        max_value=max_val,
+                        value=midpoint,
+                        step=1,
+                        key='key_health')
+    st.write(f'Health is equal to: {health}')
+
+    # --- Income ---
+    min_val = int(import_data['income'].min())
+    max_val = int(import_data['income'].max())
+    midpoint = (min_val + max_val) // 2
+
+    income = st.slider(label='Income',
+                        min_value=min_val,
+                        max_value=max_val,
+                        value=midpoint,
+                        step=1,
+                        key='key_income')
+    st.write(f'Income is equal to: {income}')
+
+    # --- Imports (First Instance) ---
+    min_val = int(import_data['imports'].min())
+    max_val = int(import_data['imports'].max())
+    midpoint = (min_val + max_val) // 2
+
+    imports = st.slider(label='Imports',
+                        min_value=min_val,
+                        max_value=max_val,
+                        value=midpoint,
+                        step=1,
+                        key='key_imports_1')
+    st.write(f'Imports are equal to: {imports}')
+
+    # --- Inflation ---
+    min_val = int(import_data['inflation'].min())
+    max_val = int(import_data['inflation'].max())
+    midpoint = (min_val + max_val) // 2
+
+    inflation = st.slider(label='Inflation',
+                        min_value=min_val,
+                        max_value=max_val,
+                        value=midpoint,
+                        step=1,
+                        key='key_inflation')
+    st.write(f'Inflation is equal to: {inflation}')
+
+    # --- Life Expectancy ---
+    min_val = int(import_data['life_expec'].min())
+    max_val = int(import_data['life_expec'].max())
+    midpoint = (min_val + max_val) // 2
+
+    life_expectancy = st.slider(label='Life Expectancy',
+                                min_value=min_val,
+                                max_value=max_val,
+                                value=midpoint,
+                                step=1,
+                                key='key_life_expec')
+    st.write(f'Life Expectancy is equal to: {life_expectancy}')
+
+    # --- Total Fertility Rate ---
+    min_val = int(import_data['total_fer'].min())
+    max_val = int(import_data['total_fer'].max())
+    midpoint = (min_val + max_val) // 2
+
+    total_fer = st.slider(label='Total Fertility Rate',
+                        min_value=min_val,
+                        max_value=max_val,
+                        value=midpoint,
+                        step=1,
+                        key='key_total_fer')
+    st.write(f'Total Fertility Rate is equal to: {total_fer}')
+
+    # --- Imports (Second Instance) ---
+    min_val = int(import_data['imports'].min())
+    max_val = int(import_data['imports'].max())
+    midpoint = (min_val + max_val) // 2
+
+    imports_2 = st.slider(label='Imports',
+                        min_value=min_val,
+                        max_value=max_val,
+                        value=midpoint,
+                        step=1,
+                        key='key_imports_2')
+    st.write(f'Imports are equal to: {imports_2}')
+
+    # --- GDP Per Capita ---
+    min_val = int(import_data['gdpp'].min())
+    max_val = int(import_data['gdpp'].max())
+    midpoint = (min_val + max_val) // 2
+
+    gdpp = st.slider(label='GDP Per Capita',
+                    min_value=min_val,
+                    max_value=max_val,
+                    value=midpoint,
+                    step=1,
+                    key='key_gdpp')
+    st.write(f'GDP per capita is equal to: {gdpp}')
