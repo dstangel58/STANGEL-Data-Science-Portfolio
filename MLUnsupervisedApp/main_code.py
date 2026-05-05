@@ -9,22 +9,35 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans 
 from sklearn.decomposition import PCA 
 
-tab1, tab2, tab3, tab4, tab5, = st.tabs(['Raw Data', 'Cluster Model', 'Income vs. Child Mortality', 'Live Expectancy vs. GDPP', 'Slider Projections'])
+tab1, tab2, tab3, tab4 = st.tabs(['Raw Data', 'Cluster Model', 'Income vs. Child Mortality', 'Live Expectancy vs. GDPP'])
 
 with tab1: 
     base_dir = Path(__file__).resolve().parent
     data_path = base_dir / 'data' / 'Country-data.csv' 
-    import_data = pd.read_csv(data_path)
+    import_data = pd.read_csv(data_path).drop(columns='gdpp')
 
-    X = import_data[['child_mort','exports','health', 'income', 'imports','inflation','life_expec','total_fer','gdpp']].values 
+    X = import_data[['child_mort','exports','health', 'income', 'imports','inflation','life_expec','total_fer']].values 
     st.dataframe(import_data)
 
 with tab2: 
     scaler = StandardScaler()
-    X_std = scaler.fit_transform(X) 
+    X_std = scaler.fit_transform(X)
 
-    k = 3 
-    kmeans = KMeans(n_clusters=k, random_state=42)
+    wcss = []
+    k_range = range(1,11)
+
+    for i in k_range: 
+        kmeans_elbow = KMeans(n_clusters=i, init='k-means++', random_state=42)
+        kmeans_elbow.fit(X_std)
+        wcss.append(kmeans_elbow.inertia_)
+
+    chosen_k = st.slider("Select number of clusters based on the elbow above:", 
+                         min_value=1,
+                         max_value=10,
+                         value=5,
+                         step=1)
+
+    kmeans = KMeans(n_clusters=chosen_k, random_state=42)
     clusters = kmeans.fit_predict(X_std)
 
     pca = PCA(n_components=2)
@@ -48,15 +61,6 @@ with tab2:
     plt.grid(True)
     st.pyplot(fig)
 
-with tab3: 
-    st.scatter_chart(data=import_data, x='income', y='child_mort')
-
-with tab4: 
-    st.scatter_chart(data=import_data, x='income', y='life_expec')
-
-with tab5: 
-    st.write(import_data.min())
-    st.write(import_data.max())
 
     # --- Child Mortality ---
     min_val = int(import_data['child_mort'].min())
@@ -162,28 +166,52 @@ with tab5:
                         key='key_total_fer')
     st.write(f'Total Fertility Rate is equal to: {total_fer}')
 
-    # --- Imports (Second Instance) ---
-    min_val = int(import_data['imports'].min())
-    max_val = int(import_data['imports'].max())
-    midpoint = (min_val + max_val) // 2
+    st.header('Cluster Prediction')
 
-    imports_2 = st.slider(label='Imports',
-                        min_value=min_val,
-                        max_value=max_val,
-                        value=midpoint,
-                        step=1,
-                        key='key_imports_2')
-    st.write(f'Imports are equal to: {imports_2}')
+    pred_data = np.array(
+        [[
+            child_mortality,
+            exports,
+            health,
+            income,
+            imports,
+            inflation,
+            life_expectancy,
+            total_fer
+        ]]
+    )
+    
+    scaled_pred_data= scaler.transform(pred_data)
+    prediction = kmeans.predict(scaled_pred_data)
+    cluster_id=prediction[0]
 
-    # --- GDP Per Capita ---
-    min_val = int(import_data['gdpp'].min())
-    max_val = int(import_data['gdpp'].max())
-    midpoint = (min_val + max_val) // 2
+    st.success(f"### Predicted Cluster: {cluster_id}")
 
-    gdpp = st.slider(label='GDP Per Capita',
-                    min_value=min_val,
-                    max_value=max_val,
-                    value=midpoint,
-                    step=1,
-                    key='key_gdpp')
-    st.write(f'GDP per capita is equal to: {gdpp}')
+    if cluster_id == 0:
+        st.write("This country likely falls into the category of [Your Interpretation of Cluster 0].")
+    elif cluster_id == 1:
+        st.write("This country likely falls into the category of [Your Interpretation of Cluster 1].")
+    elif cluster_id == 2:
+        st.write("This country likely falls into the category of [Your Interpretation of Cluster 2].")
+    elif cluster_id == 3:
+        st.write("This country likely falls into the category of [Your Interpretation of Cluster 3].")
+    elif cluster_id == 4:
+        st.write("This country likely falls into the category of [Your Interpretation of Cluster 4].")
+    elif cluster_id == 5:
+        st.write("This country likely falls into the category of [Your Interpretation of Cluster 5].")
+    elif cluster_id == 6:
+        st.write("This country likely falls into the category of [Your Interpretation of Cluster 6].")
+    elif cluster_id == 7:
+        st.write("This country likely falls into the category of [Your Interpretation of Cluster 7].")
+    elif cluster_id == 8:
+        st.write("This country likely falls into the category of [Your Interpretation of Cluster 8].")
+    elif cluster_id == 9:
+        st.write("This country likely falls into the category of [Your Interpretation of Cluster 9].")
+    else:
+        st.write("This country likely falls into the category of [Your Interpretation of Cluster 10].")
+
+with tab3: 
+    st.scatter_chart(data=import_data, x='income', y='child_mort')
+
+with tab4: 
+    st.scatter_chart(data=import_data, x='income', y='life_expec')
