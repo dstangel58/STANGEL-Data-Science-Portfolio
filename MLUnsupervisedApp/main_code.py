@@ -23,6 +23,7 @@ with st.sidebar:
     file_options = [
         'Country-data.csv', 
         '2019_country-indicators_data.csv', 
+        'global_country_development_dataset.csv'
         'worlddata.csv'
         ]
     selected_filename = st.selectbox('Or choose a pre-loaded dataset:', file_options)
