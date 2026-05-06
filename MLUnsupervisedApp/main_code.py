@@ -186,13 +186,13 @@ with tab3:
         feature_1 = selected_features[0]
         feature_2 = selected_features[1]
 
-    st.title(f'{feature_1.capitalize()} vs. {feature_2.capitalize()}')
-    st.scatter_chart(data=df, x=feature_1, y=feature_2)
+        st.title(f'{feature_1.capitalize()} vs. {feature_2.capitalize()}')  # ← indented inside else
+        st.scatter_chart(data=df, x=feature_1, y=feature_2)                 # ← indented inside else
 
-    if len(selected_features) > 2:
-        feature_3 = selected_features[2]
-        st.title(f'{feature_1.capitalize()} vs. {feature_3.capitalize()}')
-        st.scatter_chart(data=df, x=feature_1, y=feature_3)
+        if len(selected_features) > 2:
+            feature_3 = selected_features[2]
+            st.title(f'{feature_1.capitalize()} vs. {feature_3.capitalize()}')
+            st.scatter_chart(data=df, x=feature_1, y=feature_3)
     
         #(if pc1 > 1.5:
             #if pc2 > 0.5:
