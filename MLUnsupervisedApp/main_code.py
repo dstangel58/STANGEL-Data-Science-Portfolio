@@ -87,12 +87,16 @@ with tab2:
     ax.set_ylabel('Inertia (WCSS)')
     st.pyplot(fig)
 
-    chosen_k = st.slider("Select number of clusters:",
-                        min_value=2,
-                        max_value=max_k,
-                        value=min(5, max_k),
-                        step=1,
-                        key='main_key')
+    if max_k == 2:
+        chosen_k = 2
+        st.info("Only 2 clusters possible with this dataset.")
+    else:
+        chosen_k = st.slider("Select number of clusters:",
+                         min_value=2,
+                         max_value=max_k,
+                         value=min(5, max_k),
+                         step=1,
+                         key='main_key')
 
     kmeans = KMeans(n_clusters=chosen_k, random_state=42)
     clusters = kmeans.fit_predict(X_std)
