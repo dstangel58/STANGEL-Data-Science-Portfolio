@@ -4,6 +4,7 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 import sklearn as sk
+import toml
 from pathlib import Path 
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans 
@@ -22,7 +23,7 @@ with st.sidebar:
     # Pre-defined List
     file_options = [
         'Country-data.csv', 
-        '2019_country-indicators_data.csv', 
+        '2019_country_indicators_data.csv', 
         'global_country_development_dataset.csv'
         'worlddata.csv'
         ]
