@@ -22,10 +22,10 @@ with st.sidebar:
         
     # Pre-defined List
     file_options = [
-        'Country-data.csv', 
-        '2019_country_indicators_data.csv', 
-        'global_country_development_dataset.csv'
-        'worlddata.csv'
+        'Dataset_1',
+        'Dataset_2', 
+        'Dataset_3',
+        'Dataset_4'
         ]
     selected_filename = st.selectbox('Or choose a pre-loaded dataset:', file_options)
 
@@ -131,7 +131,7 @@ with tab2:
                     max_value=max_val,
                     value=mean_val,
                     key=f'key_{col}')
-        user_inputs.append(val)
+    user_inputs.append(val)
 
     pred_data = np.array([user_inputs])
 
