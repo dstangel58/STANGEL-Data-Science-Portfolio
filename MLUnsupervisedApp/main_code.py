@@ -9,7 +9,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans 
 from sklearn.decomposition import PCA 
 
-tab1, tab2, tab3, tab4 = st.tabs(['Raw Data', 'Cluster Model', 'Income vs. Child Mortality', 'Live Expectancy vs. GDPP'])
+st.header('Country Categorization: Unsupervised Machine Learning Algorithm')
+
+tab1, tab2, tab3 = st.tabs(['Raw Data', 'Cluster Model', 'Visualizations'])
 
 with tab1: 
     base_dir = Path(__file__).resolve().parent
@@ -17,6 +19,7 @@ with tab1:
     import_data = pd.read_csv(data_path).drop(columns='gdpp')
 
     X = import_data[['child_mort','exports','health', 'income', 'imports','inflation','life_expec','total_fer']].values 
+    st.title('Raw Data')
     st.dataframe(import_data)
 
 with tab2: 
@@ -30,6 +33,12 @@ with tab2:
         kmeans_elbow = KMeans(n_clusters=i, init='k-means++', random_state=42)
         kmeans_elbow.fit(X_std)
         wcss.append(kmeans_elbow.inertia_)
+    
+    fig, ax = plt.subplots()
+    ax.plot(k_range, wcss, marker='o')
+    ax.set_title('Elbow Score')
+    ax.set_xlabel('Number of Clusters')
+    ax.set_ylabel('Intertia (WCSS)')
 
     chosen_k = st.slider("Select number of clusters based on the elbow above:", 
                          min_value=1,
@@ -47,7 +56,6 @@ with tab2:
     st.write(pca.components_)
 
     plt.figure(figsize=(8,6))
-
     fig, ax = plt.subplots()
 
     for cluster_label in np.unique(clusters):
@@ -73,7 +81,7 @@ with tab2:
                                 value=midpoint,
                                 step=1,
                                 key='key_child_mort')
-    st.write(f'Child Mortality is equal to: {child_mortality}')
+    st.write(f'Child Mortality is equal to: {child_mortality} deaths per 1,000 live births')
 
     # --- Exports ---
     min_val = int(import_data['exports'].min())
@@ -86,7 +94,7 @@ with tab2:
                         value=midpoint,
                         step=1,
                         key='key_exports')
-    st.write(f'Exports are equal to: {exports}')
+    st.write(f'Exports are equal to: {exports} percent of GDP per capita')
 
     # --- Health ---
     min_val = int(import_data['health'].min())
@@ -99,7 +107,7 @@ with tab2:
                         value=midpoint,
                         step=1,
                         key='key_health')
-    st.write(f'Health is equal to: {health}')
+    st.write(f'Health spending is equal to: {health} percent of GDP per capita')
 
     # --- Income ---
     min_val = int(import_data['income'].min())
@@ -112,9 +120,9 @@ with tab2:
                         value=midpoint,
                         step=1,
                         key='key_income')
-    st.write(f'Income is equal to: {income}')
+    st.write(f'Income is equal to: {income} net dollars per person')
 
-    # --- Imports (First Instance) ---
+    # --- Imports ---
     min_val = int(import_data['imports'].min())
     max_val = int(import_data['imports'].max())
     midpoint = (min_val + max_val) // 2
@@ -124,8 +132,8 @@ with tab2:
                         max_value=max_val,
                         value=midpoint,
                         step=1,
-                        key='key_imports_1')
-    st.write(f'Imports are equal to: {imports}')
+                        key='key_imports')
+    st.write(f'Imports are equal to: {imports} percentage of GDP per capita')
 
     # --- Inflation ---
     min_val = int(import_data['inflation'].min())
@@ -138,7 +146,7 @@ with tab2:
                         value=midpoint,
                         step=1,
                         key='key_inflation')
-    st.write(f'Inflation is equal to: {inflation}')
+    st.write(f'Inflation is equal to: {inflation} percentage of the growth rate in total GDP')
 
     # --- Life Expectancy ---
     min_val = int(import_data['life_expec'].min())
@@ -151,7 +159,7 @@ with tab2:
                                 value=midpoint,
                                 step=1,
                                 key='key_life_expec')
-    st.write(f'Life Expectancy is equal to: {life_expectancy}')
+    st.write(f'Life Expectancy is equal to: {life_expectancy} years that one will live on average')
 
     # --- Total Fertility Rate ---
     min_val = int(import_data['total_fer'].min())
@@ -164,7 +172,7 @@ with tab2:
                         value=midpoint,
                         step=1,
                         key='key_total_fer')
-    st.write(f'Total Fertility Rate is equal to: {total_fer}')
+    st.write(f'Total Fertility Rate is equal to: {total_fer} children born per woman (if current age-fertility rates remain the same)')
 
     st.header('Cluster Prediction')
 
@@ -185,33 +193,54 @@ with tab2:
     prediction = kmeans.predict(scaled_pred_data)
     cluster_id=prediction[0]
 
-    st.success(f"### Predicted Cluster: {cluster_id}")
+        # --- Dynamic Cluster Labeling ---
+    centroids_original = scaler.inverse_transform(kmeans.cluster_centers_)
+    centroid_df = pd.DataFrame(centroids_original, columns=[
+        'child_mort', 'exports', 'health', 'income',
+        'imports', 'inflation', 'life_expec', 'total_fer'
+    ])
 
-    if cluster_id == 0:
-        st.write("This country likely falls into the category of [Your Interpretation of Cluster 0].")
-    elif cluster_id == 1:
-        st.write("This country likely falls into the category of [Your Interpretation of Cluster 1].")
-    elif cluster_id == 2:
-        st.write("This country likely falls into the category of [Your Interpretation of Cluster 2].")
-    elif cluster_id == 3:
-        st.write("This country likely falls into the category of [Your Interpretation of Cluster 3].")
-    elif cluster_id == 4:
-        st.write("This country likely falls into the category of [Your Interpretation of Cluster 4].")
-    elif cluster_id == 5:
-        st.write("This country likely falls into the category of [Your Interpretation of Cluster 5].")
-    elif cluster_id == 6:
-        st.write("This country likely falls into the category of [Your Interpretation of Cluster 6].")
-    elif cluster_id == 7:
-        st.write("This country likely falls into the category of [Your Interpretation of Cluster 7].")
-    elif cluster_id == 8:
-        st.write("This country likely falls into the category of [Your Interpretation of Cluster 8].")
-    elif cluster_id == 9:
-        st.write("This country likely falls into the category of [Your Interpretation of Cluster 9].")
-    else:
-        st.write("This country likely falls into the category of [Your Interpretation of Cluster 10].")
+    def label_cluster(row):
+        development_score = row['income'] + (row['life_expec'] * 500)
+        trade_score = row['exports'] + row['imports']
+        mortality_score = row['child_mort']
+
+        if mortality_score > 80:
+            return "High-Need / Fragile"
+        elif development_score > 20000 and trade_score > 60:
+            return "Developed / Trade-Open"
+        elif development_score > 20000:
+            return "Developed / Domestic-Focused"
+        elif trade_score > 60:
+            return "Emerging / Trade-Driven"
+        elif row['inflation'] > 15:
+            return "High-Inflation / Volatile"
+        else:
+            return "Developing / Average"
+        
+# Apply the labeling function to your centroid dataframe
+    centroid_df['Label'] = centroid_df.apply(label_cluster, axis=1)
+
+    # Fetch the label for the cluster the user's input belongs to
+    predicted_label = centroid_df.iloc[cluster_id]['Label']
+
+    # Display the final result with a clean UI
+    st.divider()
+    st.subheader("Final Categorization Result")
+    st.success(f"### Category: **{predicted_label}**")
+    st.info(f"This input was assigned to **Cluster {cluster_id}**.")
 
 with tab3: 
-    st.scatter_chart(data=import_data, x='income', y='child_mort')
+    st.title('Child Mortality vs. Income')
+    st.scatter_chart(data=import_data, 
+                     x='income',
+                     y='child_mort',
+                     x_label='Income (net income per person in $)', 
+                     y_label='Child Mortality (child death under 5 per 100,000 people)')
 
-with tab4: 
-    st.scatter_chart(data=import_data, x='income', y='life_expec')
+    st.title('Life Expectancy vs. Income')
+    st.scatter_chart(data=import_data, 
+                     x='income',
+                     y='life_expec',
+                     x_label='Income (net income per person in USD', 
+                     y_label='Life Expectancy (Avg. mumber of years a child would live)')
