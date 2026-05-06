@@ -7,15 +7,11 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 
-# --- removed unused imports: seaborn, sklearn (base), toml ---
-
 base_dir = Path(__file__).resolve().parent
 data_folder = base_dir / 'data'
 
 with st.sidebar:
     st.title('Data Management')
-
-    # --- removed duplicate base_dir / data_folder definitions ---
 
     uploaded_file = st.file_uploader("Upload your own CSV", type=['csv'])
 
@@ -36,18 +32,12 @@ with st.sidebar:
 
     numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
 
-    # --- removed st.sidebar.multiselect (redundant when already inside `with st.sidebar`) ---
     selected_features = st.multiselect(
         "Step 1: Select Features for Model",
         options=numeric_cols,
         default=[c for c in ['child_mort', 'income', 'life_expec', 'inflation'] if c in numeric_cols]
     )
 
-    if not selected_features:
-        st.error("Please select at least one feature in the sidebar to continue.")
-        st.stop()
-
-    # --- guard: tab3 needs at least 2 features ---
     if len(selected_features) < 2:
         st.error("Please select at least 2 features to continue.")
         st.stop()
@@ -61,23 +51,38 @@ with tab1:
     st.dataframe(df)
 
 with tab2:
-    X = df[selected_features].values
+    X = df[selected_features].dropna().values  # --- added .dropna() here too to be safe
+
+    # --- Guard: need at least 2 rows AND 2 features for PCA ---
+    n_samples, n_features = X.shape
+    n_pca_components = min(2, n_samples, n_features)  # --- never request more components than data allows
+
+    if n_samples < 2:
+        st.error("Not enough rows to cluster after removing missing values. Please load a larger dataset.")
+        st.stop()
+
+    if n_features < 2:
+        st.error("Please select at least 2 features for PCA to work.")
+        st.stop()
 
     scaler = StandardScaler()
     X_std = scaler.fit_transform(X)
 
-    # --- cap max_k BEFORE the elbow loop ---
-    max_k = min(10, len(X))
+    # --- PCA moved before KMeans so n_pca_components is available for elbow loop ---
+    pca = PCA(n_components=n_pca_components)  # --- dynamic instead of hardcoded 2
+    X_pca = pca.fit_transform(X_std)
+
+    max_k = min(10, n_samples)
 
     if max_k < 2:
         st.error("Not enough data rows to cluster. Please load a larger dataset.")
         st.stop()
 
-    # --- elbow loop now uses max_k instead of hardcoded 11 ---
+    # Elbow loop runs on X_pca now that PCA is fitted
     wcss = []
     for i in range(1, max_k + 1):
         km = KMeans(n_clusters=i, init='k-means++', random_state=42)
-        km.fit(X_std)
+        km.fit(X_pca)
         wcss.append(km.inertia_)
 
     fig, ax = plt.subplots()
@@ -92,81 +97,84 @@ with tab2:
         st.info("Only 2 clusters possible with this dataset.")
     else:
         chosen_k = st.slider("Select number of clusters:",
-                         min_value=2,
-                         max_value=max_k,
-                         value=min(5, max_k),
-                         step=1,
-                         key='main_key')
+                             min_value=2,
+                             max_value=max_k,
+                             value=min(5, max_k),
+                             step=1,
+                             key='main_key')
 
     kmeans = KMeans(n_clusters=chosen_k, random_state=42)
-    clusters = kmeans.fit_predict(X_std)
-
-    pca = PCA(n_components=2)
-    X_pca = pca.fit_transform(X_std)
+    clusters = kmeans.fit_predict(X_pca)  # --- clustering on X_pca, consistent with elbow loop
 
     st.header('PCA Component Composition')
     st.write(pca.components_)
 
     # PCA scatter plot
-    fig, ax = plt.subplots(figsize=(8, 6))
-    # --- removed stray plt.figure() call above the fig, ax = plt.subplots() line ---
-    for cluster_label in np.unique(clusters):
-        indices = clusters == cluster_label  # --- simplified indexing
-        ax.scatter(X_pca[indices, 0], X_pca[indices, 1],
-                   alpha=0.7, edgecolor='k', s=60, label=f'Cluster {cluster_label}')
-    ax.set_xlabel('Principal Component 1')
-    ax.set_ylabel('Principal Component 2')
-    ax.set_title('2D PCA Projection')
-    ax.legend(loc='best')
-    ax.grid(True)
-    st.pyplot(fig)
+    # --- Guard: only plot 2D if we actually have 2 components ---
+    if n_pca_components == 2:
+        fig, ax = plt.subplots(figsize=(8, 6))
+        for cluster_label in np.unique(clusters):
+            indices = clusters == cluster_label
+            ax.scatter(X_pca[indices, 0], X_pca[indices, 1],
+                       alpha=0.7, edgecolor='k', s=60, label=f'Cluster {cluster_label}')
+        ax.set_xlabel('Principal Component 1')
+        ax.set_ylabel('Principal Component 2')
+        ax.set_title('2D PCA Projection')
+        ax.legend(loc='best')
+        ax.grid(True)
+        st.pyplot(fig)
+    else:
+        st.info("Only 1 PCA component available — 2D plot not possible with this selection.")
 
     st.header('Country Category Predictor')
     st.write("Adjust the features to see what cluster a country would fall into!")
 
-    # --- FIX: both for loops were broken — first loop computed min/max/mean
-    #     but only kept the LAST column's values; second loop built sliders
-    #     but `user_inputs.append(val)` was outside the loop (wrong indentation)
     user_inputs = []
     for col in selected_features:
         min_val = float(df[col].min())
         max_val = float(df[col].max())
         mean_val = float(df[col].mean())
-        val = st.slider(
-            label=f'{col.capitalize()} Value',
-            min_value=min_val,
-            max_value=max_val,
-            value=mean_val,
-            key=f'key_{col}'
-        )
-        user_inputs.append(val)  # --- moved inside the loop
+
+        # --- Guard: if min == max the slider will crash ---
+        if min_val == max_val:
+            st.warning(f"'{col}' has no variation (all values are {min_val}) — skipping slider.")
+            user_inputs.append(min_val)
+        else:
+            val = st.slider(
+                label=f'{col.capitalize()} Value',
+                min_value=min_val,
+                max_value=max_val,
+                value=mean_val,
+                key=f'key_{col}'
+            )
+            user_inputs.append(val)
 
     pred_data = np.array([user_inputs])
     scaled_pred_data = scaler.transform(pred_data)
-    prediction = kmeans.predict(scaled_pred_data)
+    pca_pred_data = pca.transform(scaled_pred_data)      # --- project into PCA space before predicting
+    prediction = kmeans.predict(pca_pred_data)
     cluster_id = prediction[0]
 
     # Centroid plot
-    centroids_pca = pca.transform(kmeans.cluster_centers_)
-    pc_centroid_df = pd.DataFrame(centroids_pca, columns=['PC1', 'PC2'])
-    pc_centroid_df['Cluster'] = [f'Cluster {i}' for i in range(chosen_k)]
+    if n_pca_components == 2:
+        pc_centroid_df = pd.DataFrame(kmeans.cluster_centers_, columns=['PC1', 'PC2'])
+        pc_centroid_df['Cluster'] = [f'Cluster {i}' for i in range(chosen_k)]
 
-    fig, ax = plt.subplots()
-    ax.scatter(pc_centroid_df['PC1'], pc_centroid_df['PC2'],
-               c='red', s=150, marker='X', edgecolor='k')
+        fig, ax = plt.subplots()
+        ax.scatter(pc_centroid_df['PC1'], pc_centroid_df['PC2'],
+                   c='red', s=150, marker='X', edgecolor='k')
 
-    # --- moved annotations onto ax and inside the fig block (were after st.pyplot, too late to render)
-    for i, txt in enumerate(pc_centroid_df['Cluster']):
-        ax.annotate(txt, (pc_centroid_df['PC1'][i], pc_centroid_df['PC2'][i]),
-                    xytext=(5, 5), textcoords='offset points')
+        for i, txt in enumerate(pc_centroid_df['Cluster']):
+            ax.annotate(txt, (pc_centroid_df['PC1'][i], pc_centroid_df['PC2'][i]),
+                        xytext=(5, 5), textcoords='offset points')
 
-    ax.set_title('Centroids Mapped in 2D Space')
-    ax.set_xlabel('Principal Component 1')
-    ax.set_ylabel('Principal Component 2')  # --- fixed typo "Principle" → "Principal"
-    st.pyplot(fig)  # --- moved after annotations are added
+        ax.set_title('Centroids Mapped in 2D Space')
+        ax.set_xlabel('Principal Component 1')
+        ax.set_ylabel('Principal Component 2')
+        st.pyplot(fig)
 
-    st.write("**Cluster centroids in PCA space:**")
-    st.dataframe(pc_centroid_df.round(3))
+        st.write("**Cluster centroids in PCA space:**")
+        st.dataframe(pc_centroid_df.round(3))
 
     st.divider()
     st.info(f"This input was assigned to **Cluster {cluster_id}**.")
