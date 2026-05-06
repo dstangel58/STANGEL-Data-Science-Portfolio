@@ -66,33 +66,33 @@ with tab2:
     scaler = StandardScaler()
     X_std = scaler.fit_transform(X)
 
+    # --- cap max_k BEFORE the elbow loop ---
     max_k = min(10, len(X))
 
     if max_k < 2:
         st.error("Not enough data rows to cluster. Please load a larger dataset.")
         st.stop()
 
-    # Elbow plot
+    # --- elbow loop now uses max_k instead of hardcoded 11 ---
     wcss = []
-    for i in range(1, 11):
+    for i in range(1, max_k + 1):
         km = KMeans(n_clusters=i, init='k-means++', random_state=42)
         km.fit(X_std)
         wcss.append(km.inertia_)
 
     fig, ax = plt.subplots()
-    ax.plot(range(1, 11), wcss, marker='o')
+    ax.plot(range(1, max_k + 1), wcss, marker='o')
     ax.set_title('Elbow Score')
     ax.set_xlabel('Number of Clusters')
     ax.set_ylabel('Inertia (WCSS)')
-    st.pyplot(fig)  # --- removed erroneous second argument `ax`
-
+    st.pyplot(fig)
 
     chosen_k = st.slider("Select number of clusters:",
-                         min_value=2,  # --- changed from 1 (KMeans needs ≥ 2)
-                         max_value=max_k,
-                         value=min(5, max_k),
-                         step=1,
-                         key='main_key')
+                        min_value=2,
+                        max_value=max_k,
+                        value=min(5, max_k),
+                        step=1,
+                        key='main_key')
 
     kmeans = KMeans(n_clusters=chosen_k, random_state=42)
     clusters = kmeans.fit_predict(X_std)
