@@ -1,4 +1,4 @@
-import pandas as pd 
+import pandas as pd # install packages 
 import seaborn as sns 
 import streamlit as st 
 import numpy as np
@@ -14,15 +14,55 @@ st.header('Country Categorization: Unsupervised Machine Learning Algorithm')
 tab1, tab2, tab3 = st.tabs(['Raw Data', 'Cluster Model', 'Visualizations'])
 
 with tab1: 
-    base_dir = Path(__file__).resolve().parent
-    data_path = base_dir / 'data' / 'Country-data.csv' 
-    import_data = pd.read_csv(data_path).drop(columns='gdpp')
 
-    X = import_data[['child_mort','exports','health', 'income', 'imports','inflation','life_expec','total_fer']].values 
-    st.title('Raw Data')
-    st.dataframe(import_data)
+    base_dir = Path(__file__).resolve().parent
+    data_folder = base_dir / 'data'
+
+    # 2. Sidebar: Selection & Upload
+    with st.sidebar:
+        st.title('Data Management')
+        
+        # File Uploader
+        uploaded_file = st.file_uploader("Upload your own CSV", type=['csv'])
+        
+        # Pre-defined List
+        file_options = [
+            'Country-data.csv', 
+            '2019_country-indicators_data.csv', 
+            'global_country_development_dataset.csv', 
+            'worlddata.csv'
+        ]
+        selected_filename = st.selectbox('Or choose a pre-loaded dataset:', file_options)
+
+        if uploaded_file is not None:
+            df = pd.read_csv(uploaded_file)
+        else:
+            df = pd.read_csv(data_folder / selected_filename)
+
+        base_dir = Path(__file__).resolve().parent
+        data_path = base_dir / 'data'
+
+    
+    # Drop non-numeric/unnecessary columns if they exist
+    df = df.drop(columns=['gdpp', 'country'], errors='ignore')
+
+    # 1. THE DYNAMIC SELECTION (Option #1)
+    numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+    selected_features = st.sidebar.multiselect(
+        "Step 1: Select Features for Model",
+        options=numeric_cols,
+        default=[c for c in ['child_mort', 'income', 'life_expec', 'inflation'] if c in numeric_cols]
+    )
+
+    # Guard rail: Stop if nothing is selected
+    if not selected_features:
+        st.error("Please select at least one feature in the sidebar to continue.")
+        st.stop()
 
 with tab2: 
+
+    X = df[selected_features].values
+    
     scaler = StandardScaler()
     X_std = scaler.fit_transform(X)
 
@@ -40,6 +80,8 @@ with tab2:
     ax.set_xlabel('Number of Clusters')
     ax.set_ylabel('Intertia (WCSS)')
 
+    st.pyplot(fig, ax)
+
     chosen_k = st.slider("Select number of clusters based on the elbow above:", 
                          min_value=1,
                          max_value=10,
@@ -52,7 +94,8 @@ with tab2:
     pca = PCA(n_components=2)
     X_pca = pca.fit_transform(X_std)
 
-    st.write('The first principal component explains variance through income and life expectancy, while the variance of the second principal component is largely defined by trade: imports and exports.')
+    st.write('**PC1** (x-axis): High positive = high income & long life expectancy (developed). High negative = low income & short life expectancy (fragile).')
+    st.write('**PC2** (y-axis): High positive = trade-heavy (high imports & exports). Low = domestically focused.')
     st.write(pca.components_)
 
     plt.figure(figsize=(8,6))
@@ -69,178 +112,79 @@ with tab2:
     plt.grid(True)
     st.pyplot(fig)
 
+    st.header('Country Category Predictor')
+    st.write("Adjust the features to see what cluster a country would fall into!")
 
-    # --- Child Mortality ---
-    min_val = int(import_data['child_mort'].min())
-    max_val = int(import_data['child_mort'].max())
-    midpoint = (min_val + max_val) // 2
+    user_inputs = []
 
-    child_mortality = st.slider(label='Child Mortality',
-                                min_value=min_val,
-                                max_value=max_val,
-                                value=midpoint,
-                                step=1,
-                                key='key_child_mort')
-    st.write(f'Child Mortality is equal to: {child_mortality} deaths per 1,000 live births')
+    for col in selected_features:
+        min_val=float(df[col].min())
+        max_val=float(df[col].max())
+        mean_val=float(df[col].mean())
 
-    # --- Exports ---
-    min_val = int(import_data['exports'].min())
-    max_val = int(import_data['exports'].max())
-    midpoint = (min_val + max_val) // 2
+    val=st.slider(label=f'{col.capitalize()} Value',
+                  min_value=min_val,
+                  max_value=max_val,
+                  value=mean_val,
+                  key=f'key_{col}')
+    user_inputs.append(val)
 
-    exports = st.slider(label='Exports',
-                        min_value=min_val,
-                        max_value=max_val,
-                        value=midpoint,
-                        step=1,
-                        key='key_exports')
-    st.write(f'Exports are equal to: {exports} percent of GDP per capita')
+    pred_data = np.array([user_inputs])
 
-    # --- Health ---
-    min_val = int(import_data['health'].min())
-    max_val = int(import_data['health'].max())
-    midpoint = (min_val + max_val) // 2
-
-    health = st.slider(label='Health',
-                        min_value=min_val,
-                        max_value=max_val,
-                        value=midpoint,
-                        step=1,
-                        key='key_health')
-    st.write(f'Health spending is equal to: {health} percent of GDP per capita')
-
-    # --- Income ---
-    min_val = int(import_data['income'].min())
-    max_val = int(import_data['income'].max())
-    midpoint = (min_val + max_val) // 2
-
-    income = st.slider(label='Income',
-                        min_value=min_val,
-                        max_value=max_val,
-                        value=midpoint,
-                        step=1,
-                        key='key_income')
-    st.write(f'Income is equal to: {income} net dollars per person')
-
-    # --- Imports ---
-    min_val = int(import_data['imports'].min())
-    max_val = int(import_data['imports'].max())
-    midpoint = (min_val + max_val) // 2
-
-    imports = st.slider(label='Imports',
-                        min_value=min_val,
-                        max_value=max_val,
-                        value=midpoint,
-                        step=1,
-                        key='key_imports')
-    st.write(f'Imports are equal to: {imports} percentage of GDP per capita')
-
-    # --- Inflation ---
-    min_val = int(import_data['inflation'].min())
-    max_val = int(import_data['inflation'].max())
-    midpoint = (min_val + max_val) // 2
-
-    inflation = st.slider(label='Inflation',
-                        min_value=min_val,
-                        max_value=max_val,
-                        value=midpoint,
-                        step=1,
-                        key='key_inflation')
-    st.write(f'Inflation is equal to: {inflation} percentage of the growth rate in total GDP')
-
-    # --- Life Expectancy ---
-    min_val = int(import_data['life_expec'].min())
-    max_val = int(import_data['life_expec'].max())
-    midpoint = (min_val + max_val) // 2
-
-    life_expectancy = st.slider(label='Life Expectancy',
-                                min_value=min_val,
-                                max_value=max_val,
-                                value=midpoint,
-                                step=1,
-                                key='key_life_expec')
-    st.write(f'Life Expectancy is equal to: {life_expectancy} years that one will live on average')
-
-    # --- Total Fertility Rate ---
-    min_val = int(import_data['total_fer'].min())
-    max_val = int(import_data['total_fer'].max())
-    midpoint = (min_val + max_val) // 2
-
-    total_fer = st.slider(label='Total Fertility Rate',
-                        min_value=min_val,
-                        max_value=max_val,
-                        value=midpoint,
-                        step=1,
-                        key='key_total_fer')
-    st.write(f'Total Fertility Rate is equal to: {total_fer} children born per woman (if current age-fertility rates remain the same)')
-
-    st.header('Cluster Prediction')
-
-    pred_data = np.array(
-        [[
-            child_mortality,
-            exports,
-            health,
-            income,
-            imports,
-            inflation,
-            life_expectancy,
-            total_fer
-        ]]
-    )
-    
     scaled_pred_data= scaler.transform(pred_data)
     prediction = kmeans.predict(scaled_pred_data)
     cluster_id=prediction[0]
 
-        # --- Dynamic Cluster Labeling ---
-    centroids_original = scaler.inverse_transform(kmeans.cluster_centers_)
-    centroid_df = pd.DataFrame(centroids_original, columns=[
-        'child_mort', 'exports', 'health', 'income',
-        'imports', 'inflation', 'life_expec', 'total_fer'
-    ])
+    # ---  Cluster Labeling ---
+    centroids_pca = pca.transform(kmeans.cluster_centers_)
+    pc_centroid_df = pd.DataFrame(centroids_pca, columns=['PC1', 'PC2'])
 
     def label_cluster(row):
-        development_score = row['income'] + (row['life_expec'] * 500)
-        trade_score = row['exports'] + row['imports']
-        mortality_score = row['child_mort']
+        pc1 = row['PC1']
+        pc2 = row['PC2']
 
-        if mortality_score > 80:
-            return "High-Need / Fragile"
-        elif development_score > 20000 and trade_score > 60:
-            return "Developed / Trade-Open"
-        elif development_score > 20000:
-            return "Developed / Domestic-Focused"
-        elif trade_score > 60:
-            return "Emerging / Trade-Driven"
-        elif row['inflation'] > 15:
-            return "High-Inflation / Volatile"
+        if pc1 > 1.5:
+            if pc2 > 0.5:
+                return "Developed / Trade-Open"
+            else:
+                return "Developed / Domestic-Focused"
+        elif pc1 < -1.0:
+            if pc2 > 0.5:
+                return "Fragile / Trade-Dependent"
+            else:
+                return "High-Need / Fragile"
         else:
-            return "Developing / Average"
+            if pc2 > 1.0:
+                return "Emerging / Trade-Driven"
+            elif pc2 < -0.5:
+                return "Emerging / Import-Reliant"
+            else:
+                return "Middle-Income / Balanced"
         
-# Apply the labeling function to your centroid dataframe
-    centroid_df['Label'] = centroid_df.apply(label_cluster, axis=1)
+    pc_centroid_df['label'] = pc_centroid_df.apply(label_cluster, axis=1)
+    cluster_label_map = pc_centroid_df['label'].to_dict()
 
-    # Fetch the label for the cluster the user's input belongs to
-    predicted_label = centroid_df.iloc[cluster_id]['Label']
+    # Show centroid table so you can calibrate thresholds
+    st.write("**Cluster centroids in PCA space:**")
+    st.dataframe(pc_centroid_df.round(3))
 
     # Display the final result with a clean UI
     st.divider()
-    st.subheader("Final Categorization Result")
-    st.success(f"### Category: **{predicted_label}**")
     st.info(f"This input was assigned to **Cluster {cluster_id}**.")
 
 with tab3: 
-    st.title('Child Mortality vs. Income')
-    st.scatter_chart(data=import_data, 
-                     x='income',
-                     y='child_mort',
-                     x_label='Income (net income per person in $)', 
-                     y_label='Child Mortality (child death under 5 per 100,000 people)')
+    feature_1=selected_features[0]
+    feature_2=selected_features[1]
 
-    st.title('Life Expectancy vs. Income')
-    st.scatter_chart(data=import_data, 
-                     x='income',
-                     y='life_expec',
-                     x_label='Income (net income per person in USD', 
-                     y_label='Life Expectancy (Avg. mumber of years a child would live)')
+    st.title(f'{feature_1.capitalize()} vs. {feature_2.capitalize()}')
+    st.scatter_chart(data=df, 
+                     x=feature_1,
+                     y=feature_2)
+
+    if len(selected_features) > 2:
+        feature_3 = selected_features[2]
+        st.title(f'{feature_1.capitalize()} vs. {feature_3.capitalize()}')
+        st.scatter_chart(data=df, 
+                         x=feature_1,
+                         y=feature_3)
+
