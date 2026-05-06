@@ -60,8 +60,6 @@ kiwisolver @ file:///opt/miniconda3/conda-bld/kiwisolver_1764159432715/work
 libmambapy @ file:///opt/miniconda3/conda-bld/mamba-split_1763111381025/work/libmambapy
 markdown-it-py @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_6av49xs_3l/croot/markdown-it-py_1756299201304/work
 MarkupSafe==3.0.3
-matplotlib==3.10.8
-matplotlib-inline @ file:///home/conda/feedstock_root/build_artifacts/matplotlib-inline_1761214490209/work
 mdurl @ file:///opt/miniconda3/conda-bld/mdurl_1758552175942/work
 menuinst @ file:///opt/miniconda3/conda-bld/menuinst_1765382369523/work
 more-itertools @ file:///opt/miniconda3/conda-bld/more-itertools_1761121541654/work

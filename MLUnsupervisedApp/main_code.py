@@ -1,7 +1,6 @@
 import pandas as pd
 import streamlit as st
 import numpy as np
-import matplotlib.pyplot as plt
 from pathlib import Path
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
@@ -29,7 +28,6 @@ with st.sidebar:
             st.stop()
 
     df = df.drop(columns=['gdpp', 'country'], errors='ignore')
-
     numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
 
     selected_features = st.multiselect(
@@ -51,14 +49,13 @@ with tab1:
     st.dataframe(df)
 
 with tab2:
-    X = df[selected_features].dropna().values  # --- added .dropna() here too to be safe
+    X = df[selected_features].dropna().values
 
-    # --- Guard: need at least 2 rows AND 2 features for PCA ---
     n_samples, n_features = X.shape
-    n_pca_components = min(2, n_samples, n_features)  # --- never request more components than data allows
+    n_pca_components = min(2, n_samples, n_features)
 
     if n_samples < 2:
-        st.error("Not enough rows to cluster after removing missing values. Please load a larger dataset.")
+        st.error("Not enough rows to cluster. Please load a larger dataset.")
         st.stop()
 
     if n_features < 2:
@@ -68,8 +65,7 @@ with tab2:
     scaler = StandardScaler()
     X_std = scaler.fit_transform(X)
 
-    # --- PCA moved before KMeans so n_pca_components is available for elbow loop ---
-    pca = PCA(n_components=n_pca_components)  # --- dynamic instead of hardcoded 2
+    pca = PCA(n_components=n_pca_components)
     X_pca = pca.fit_transform(X_std)
 
     max_k = min(10, n_samples)
@@ -78,19 +74,16 @@ with tab2:
         st.error("Not enough data rows to cluster. Please load a larger dataset.")
         st.stop()
 
-    # Elbow loop runs on X_pca now that PCA is fitted
+    # --- Elbow plot using st.line_chart instead of matplotlib ---
     wcss = []
     for i in range(1, max_k + 1):
         km = KMeans(n_clusters=i, init='k-means++', random_state=42)
         km.fit(X_pca)
         wcss.append(km.inertia_)
 
-    fig, ax = plt.subplots()
-    ax.plot(range(1, max_k + 1), wcss, marker='o')
-    ax.set_title('Elbow Score')
-    ax.set_xlabel('Number of Clusters')
-    ax.set_ylabel('Inertia (WCSS)')
-    st.pyplot(fig)
+    st.subheader('Elbow Score')
+    elbow_df = pd.DataFrame({'Number of Clusters': range(1, max_k + 1), 'Inertia (WCSS)': wcss})
+    st.line_chart(elbow_df, x='Number of Clusters', y='Inertia (WCSS)')
 
     if max_k == 2:
         chosen_k = 2
@@ -104,25 +97,17 @@ with tab2:
                              key='main_key')
 
     kmeans = KMeans(n_clusters=chosen_k, random_state=42)
-    clusters = kmeans.fit_predict(X_pca)  # --- clustering on X_pca, consistent with elbow loop
+    clusters = kmeans.fit_predict(X_pca)
 
     st.header('PCA Component Composition')
-    st.write(pca.components_)
+    st.write(pd.DataFrame(pca.components_, columns=selected_features))
 
-    # PCA scatter plot
-    # --- Guard: only plot 2D if we actually have 2 components ---
+    # --- PCA scatter plot using st.scatter_chart instead of matplotlib ---
     if n_pca_components == 2:
-        fig, ax = plt.subplots(figsize=(8, 6))
-        for cluster_label in np.unique(clusters):
-            indices = clusters == cluster_label
-            ax.scatter(X_pca[indices, 0], X_pca[indices, 1],
-                       alpha=0.7, edgecolor='k', s=60, label=f'Cluster {cluster_label}')
-        ax.set_xlabel('Principal Component 1')
-        ax.set_ylabel('Principal Component 2')
-        ax.set_title('2D PCA Projection')
-        ax.legend(loc='best')
-        ax.grid(True)
-        st.pyplot(fig)
+        st.subheader('2D PCA Projection')
+        pca_df = pd.DataFrame(X_pca, columns=['PC1', 'PC2'])
+        pca_df['Cluster'] = clusters.astype(str)
+        st.scatter_chart(pca_df, x='PC1', y='PC2', color='Cluster')
     else:
         st.info("Only 1 PCA component available — 2D plot not possible with this selection.")
 
@@ -135,7 +120,6 @@ with tab2:
         max_val = float(df[col].max())
         mean_val = float(df[col].mean())
 
-        # --- Guard: if min == max the slider will crash ---
         if min_val == max_val:
             st.warning(f"'{col}' has no variation (all values are {min_val}) — skipping slider.")
             user_inputs.append(min_val)
@@ -151,27 +135,15 @@ with tab2:
 
     pred_data = np.array([user_inputs])
     scaled_pred_data = scaler.transform(pred_data)
-    pca_pred_data = pca.transform(scaled_pred_data)      # --- project into PCA space before predicting
-    prediction = kmeans.predict(pca_pred_data)
-    cluster_id = prediction[0]
+    pca_pred_data = pca.transform(scaled_pred_data)
+    cluster_id = kmeans.predict(pca_pred_data)[0]
 
-    # Centroid plot
+    # --- Centroid plot using st.scatter_chart instead of matplotlib ---
     if n_pca_components == 2:
+        st.subheader('Centroids Mapped in 2D Space')
         pc_centroid_df = pd.DataFrame(kmeans.cluster_centers_, columns=['PC1', 'PC2'])
         pc_centroid_df['Cluster'] = [f'Cluster {i}' for i in range(chosen_k)]
-
-        fig, ax = plt.subplots()
-        ax.scatter(pc_centroid_df['PC1'], pc_centroid_df['PC2'],
-                   c='red', s=150, marker='X', edgecolor='k')
-
-        for i, txt in enumerate(pc_centroid_df['Cluster']):
-            ax.annotate(txt, (pc_centroid_df['PC1'][i], pc_centroid_df['PC2'][i]),
-                        xytext=(5, 5), textcoords='offset points')
-
-        ax.set_title('Centroids Mapped in 2D Space')
-        ax.set_xlabel('Principal Component 1')
-        ax.set_ylabel('Principal Component 2')
-        st.pyplot(fig)
+        st.scatter_chart(pc_centroid_df, x='PC1', y='PC2', color='Cluster')
 
         st.write("**Cluster centroids in PCA space:**")
         st.dataframe(pc_centroid_df.round(3))
@@ -186,8 +158,8 @@ with tab3:
         feature_1 = selected_features[0]
         feature_2 = selected_features[1]
 
-        st.title(f'{feature_1.capitalize()} vs. {feature_2.capitalize()}')  # ← indented inside else
-        st.scatter_chart(data=df, x=feature_1, y=feature_2)                 # ← indented inside else
+        st.title(f'{feature_1.capitalize()} vs. {feature_2.capitalize()}')
+        st.scatter_chart(data=df, x=feature_1, y=feature_2)
 
         if len(selected_features) > 2:
             feature_3 = selected_features[2]
