@@ -180,8 +180,11 @@ with tab2:
     st.info(f"This input was assigned to **Cluster {cluster_id}**.")
 
 with tab3:
-    feature_1 = selected_features[0]
-    feature_2 = selected_features[1]
+    if len(selected_features) < 2:
+        st.warning("Please select at least 2 features in the sidebar to view charts.")
+    else:
+        feature_1 = selected_features[0]
+        feature_2 = selected_features[1]
 
     st.title(f'{feature_1.capitalize()} vs. {feature_2.capitalize()}')
     st.scatter_chart(data=df, x=feature_1, y=feature_2)
