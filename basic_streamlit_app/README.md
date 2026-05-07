@@ -27,6 +27,7 @@ The dashboard leverages custom filtering for maximum flexibility, allowing users
 * Key Metrics (st.metric): Provides a high-level summary of means and population counts.
 
 ## 🧑‍🏫 **Guides and Tutorials:** 🧑‍🏫
+<<<<<<< HEAD
 * Streamlit Layouts (Columns & Metrics): https://docs.streamlit.io/develop/api-reference/layout/st.columns
 * Seaborn Boxplot Guide: https://seaborn.pydata.org/generated/seaborn.boxplot.html
 * Palmer Penguins Dataset Info: https://allisonhorst.github.io/palmerpenguins/
@@ -34,3 +35,13 @@ The dashboard leverages custom filtering for maximum flexibility, allowing users
 ## 📸 **Images:** 📸
 <img width="792" height="431" alt="Screenshot 2026-05-06 at 11 59 32 PM" src="https://github.com/user-attachments/assets/db37e516-5018-41e4-af5c-4dc0afc4ae79" />
 Chart Example
+=======
+
+Streamlit Layouts (Columns & Metrics): https://docs.streamlit.io/develop/api-reference/layout/st.columns
+Seaborn Boxplot Guide: https://seaborn.pydata.org/generated/seaborn.boxplot.html
+Palmer Penguins Dataset Info: https://allisonhorst.github.io/palmerpenguins/
+
+## 📸 **Images:** 📸
+
+Charts
+>>>>>>> cfef10d (Updated readmes)
