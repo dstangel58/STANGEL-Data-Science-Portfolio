@@ -1,57 +1,38 @@
-Welcome to my data science portfolio. Take a look at my diverse array of projects below! 
+# Data Science Portfolio: Spring 2026 
 
-### Penguins.csv ###
-In this dashboard, I create a streamlit application to compare penguins in the penguins.csv dataset with both distribution and trend analysis on the basis of features like bill length and body mass. This shows trends in species across islands. Both can be toggled in the application itself. It includes: 
+## Project Portfolio "At a Glance" 
+| **Congress 1984** | [Supervised ML](https://github.com/dstangel58/STANGEL-Data-Science-Portfolio/tree/main/sml_streamlit_app)
+| **Country Categorization** | [Unsupervised ML](https://github.com/dstangel58/STANGEL-Data-Science-Portfolio/tree/main/MLUnsupervisedApp)
+| **Mutant Moneyball** | [Tidy Data](https://github.com/dstangel58/STANGEL-Data-Science-Portfolio/tree/main/TidyData-Project)
+| **Penguin Analytics** | [EDA](https://github.com/dstangel58/STANGEL-Data-Science-Portfolio/tree/main/basic_streamlit_app)
 
-1) **Scatter Plots:**
-2) **Distribution Analysis** 
-3) **Trend Analysis:**
+## Detailed Summaries
 
-This update shows how I use visualizations to display trends between a variety of differenty data types (both numerical and categorical). 
+### ⚖️ Congress 1984: Party Prediction
+Using a **Decision Tree Classifier**, this app analyzes voting records from the 1984 Congressional session. It features an interactive quiz where you can vote on 16 historical bills to see which party your views align with.
+* **Key Skills:** Hyperparameter tuning, F1 Score optimization, and Classification metrics.
 
-Take a look: https://github.com/dstangel58/STANGEL-Data-Science-Portfolio/tree/main/basic_streamlit_app
+### 🌍 Country Categorization
+This project takes global development indicators (GDP, health spending) and groups similar countries using **KMeans Clustering**. It uses **PCA** to reduce dimensionality and visualize complex data on a 2D plane.
+* **Key Skills:** Dimensionality reduction, Silhouette Scores, and Unsupervised learning.
 
-### MUTANT MONEYBALL ### 
-In this project, I transform the raw dataset to track the relationships between the average value of comic book appearances over four decades and two categorical variables: platform and decade. By using tidy data principles, I changed the "wide" format of the data to a "narrow" one by using the pandas.melt() function. The analysis explores how the values of certain character appearnces change over time, compared to four main valuation methods: 
+### 📚 Mutant Moneyball: Comic Valuations
+A deep dive into **Tidy Data principles**. I used `pandas.melt()` to transform complex, "wide" format data from four major platforms (Heritage, eBay, Wizard, O Street) into a "narrow" format ready for analysis.
+* **Key Skills:** Data cleaning, Pivot tables, and Market trend analysis.
 
-🏛️ **Heritage Auctions**
-🛒 **eBay**
-📚 **Wizard (Wiz)**
-🏪 **O Street**
+### 🐧 Penguins.csv Dashboard
+An interactive Streamlit application that explores the Palmer Penguins dataset. Users can toggle between scatter plots and trend analyses to see how physical features vary across different species and islands.
+* **Key Skills:** Distribution analysis, UI design, and Exploratory Data Analysis (EDA).
 
-While Heritage used highest individual sale price, the other platforms aggregated various average sale values over time. 
+## 🛠️ Tech Stack & Tools 
+* **Data Wrangling:** 🐼 Pandas, 🔢 NumPy
+* **Visualization:** ⚓ Seaborn, 📈 Matplotlib, 🎨 Plotly
+* **Machine Learning:** 🧠 Scikit-Learn (KMeans, PCA, Decision Trees)
+* **Deployment:** 🚀 Streamlit
 
-This update shows how I can split complex, messy data into clean, tidy data based on the fundamental, tidy data principles.
-
-Take a look: https://github.com/dstangel58/STANGEL-Data-Science-Portfolio/tree/main/TidyData-Project
-
-### 🏛️ Congress 1984: Voting Records & Party Prediction ###
-
-This app uses streamlit to display congressional voting data from 1984. You can even vote on bills like a member of Congress from that session **under the quiz tab**! Based on the 16 possible votes, you can view the decision tree classifier model to understand the polarization and partisan splits in individual pieces of legislation. I used: 
-
-1) **Exploratory Data Analysis**
-2) **Machine Learning Pipeline**
-3) **Performance Metrics**
-4) **Interactive Quiz**
-
-In this update, I show how I can employ machine learning to categorize an individual's interests based on old political issues. By incorporating machine learning, I create an accurate model by which to categorize users. 
-
-Take a look: https://github.com/dstangel58/STANGEL-Data-Science-Portfolio/tree/main/sml_streamlit_app
-
-### Libraries ### 
-
-Though it depends on the project, my work most often uses: 
-
-**Pandas 🐼**
-**Seaborn ⚓️**
-**Matplotlib.pyplot 📈**
-**numpy 🔢**
-*And many more (check project READMEs!)*
-
-### 💪 REPOSITORY GOALS 💪 ## 
-This repository will contain all of my portfolio updates this semester. I aim for it to serve as a complete record of the knowledge I gain about Python in Spring 2026. I will learn the basics of: 
-
-📚 **Data wranging**
-🧠 **Tidying data**
-🛠️ **Supervised Machine Learning** 
-💼 **Unsupervised machine learning (coming soon!)**
+## 💪 Portfolio Goals 
+This repository tracks my progress across four major pillars of data science this semester:
+1. **Data Wrangling:** Mastering the art of cleaning messy real-world data.
+2. **Tidying Data:** Ensuring one observation per row for efficient analysis.
+3. **Supervised ML:** Building models that predict categories with high precision.
+4. **Unsupervised ML:** Finding hidden patterns and clusters in unlabeled data.

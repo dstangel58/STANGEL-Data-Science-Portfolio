@@ -1,26 +1,32 @@
-### 🧬 PROJECT OVERVIEW ### 
-In this project, I transform the raw dataset to track the relationships between the average value of comic book appearances over four decades and two categorical variables: platform and decade. By using tidy data principles, I changed the "wide" format of the data to a "narrow" one by using the pandas.melt() function. The analysis explores how the values of certain character appearnces change over time, compared to four main valuation methods: 
-1) Heritage Auctions
-2) eBay
-3) Wizard (Wiz)
-4) O Street
+# 📚 **Comic Book Valuation: Tidy Data & Market Trends** 📚
 
-While Heritage used highest individual sale price, the other platforms aggregated various average sale values over time. 
+## **Project Summary:**
+In this project, you can explore the relationships between the average value of comic book appearances over four decades across different market platforms. By applying Tidy Data principles, the raw dataset was transformed from a "wide" to a "narrow" format using pandas.melt(), ensuring each row represents a single observation. The analysis compares four major valuation methods—Heritage Auctions, eBay, Wizard (Wiz), and O Street—to visualize how market prices fluctuate over time.
 
-### Data Cleaning and Preparation ### 
+While Heritage Auctions tracks the highest individual sale prices, the other platforms aggregate average sale values. The data was cleaned by stripping special characters ($, ,) and splitting columns to follow structured data standards.
 
-The data was split into the 'Source' and 'Decade' columns to better organize results and follow the tidy data principle of one observation per row. In addition, I removed dollar signs and commas to standarize values.
+## 📖 **Steps to Use:** 📖
+* Clone the Repository
+    * git clone https://github.com/dstangel58/STANGEL-Data-Science-Portfolio.git
+    * cd STANGEL-Data-Science-Portfolio/ComicValuationApp
+* Download requirements.txt
+    * (Requires: pandas, seaborn, matplotlib)
+    * pip install -r requirements.txt
+* Run the code!
+    * python comic_analysis.py
 
-### 📈 Insights ### 
+## ⬇️ **Valuation Sources:** ⬇️
+* Heritage Auctions: Highest individual sale metrics.
+* eBay: Aggregated average market sales.
+* Wizard (Wiz): Historical guide pricing.
+* O Street: Secondary market average valuations.
 
-The charts show higher values over time. Heritage is separated because it employs a different metric. I created bar charts by valuation and decade to show change over time on a standard scale. 
+## 🧑‍🏫 **Guides and Tutorials:** 🧑‍🏫
+* Tidy Data Paper (Hadley Wickham): https://vita.had.co.nz/papers/tidy-data.pdf
+* Pandas Melt Guide: https://pandas.pydata.org/docs/reference/api/pandas.melt.html
+* Seaborn Barplot Documentation: https://seaborn.pydata.org/generated/seaborn.barplot.html
+* Pivot Table Medians: https://pandas.pydata.org/docs/reference/api/pandas.pivot_table.html
 
-### Statistics and Pivot Tables ### 
-
-Pivot tables were created using medians since they show a more typical value. 
-
-MAIN CONCLUSION --> Older appearances have higher values
-
-### Libraries Used ### 
-
-Python, pandas, seaborn, matplotlib
+📸 **Images:**##  📸
+![alt text](<Screenshot 2026-05-06 at 11.24.47 PM.png>)
+Cleaned Data
