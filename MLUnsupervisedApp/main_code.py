@@ -19,11 +19,11 @@ with st.sidebar:
     selected_filename = st.selectbox('Or choose a pre-loaded dataset:', file_options) #select box for datasets 1-4
 
     if uploaded_file is not None:
-        df = pd.read_csv(uploaded_file).dropna()
+        df = pd.read_csv(uploaded_file)
         st.success(f"Loaded: {uploaded_file.name}")
     else:
         try:
-            df = pd.read_csv(data_folder / selected_filename).dropna() # eliminates null values in selected file 
+            df = pd.read_csv(data_folder / selected_filename) # eliminates null values in selected file 
         except FileNotFoundError:
             st.error(f"Could not find {selected_filename} in /data. Check the filename.")
             st.stop()
